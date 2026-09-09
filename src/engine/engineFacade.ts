@@ -35,8 +35,8 @@ export function getEngineBackend(): Promise<EngineBackend> {
     singleton = (async () => {
       if (KATAGO_ENABLED) {
         try {
-          // 首次加载需取回 93MB 模型并建图，就绪门控给足时间
-          if (await isKatagoTsReady(120_000)) {
+          // 首次加载需取回约 190MB 模型并建图；慢网络放宽门控，失败仍回退 UCT
+          if (await isKatagoTsReady(240_000)) {
             return {
               name: KATAGO_MODEL_NAME,
               genMove: katagoGenMove,
