@@ -1,0 +1,1293 @@
+
+(
+  ;FF[4]
+  GM[1]
+  CA[UTF-8]
+  AP[Sabaki:0.52.0]
+  SZ[19]
+  PW[Nakagawa Junsetsu 5d]
+  PB[Yasuda Shusaku 1d]
+  KM[0]
+  DT[2022-07-09]
+  HA[2]
+  RE[B+R]
+  PL[W]
+  AB[dp][pd]
+  C[Shusaku Study Project
+
+PJ:
+- Itarios
+- FireScourge
+- D-E
+- Trevoke
+
+DOP:
+- Trevoke
+- FireScourge
+- Itarios
+- D-E
+
+Reading:
+- bugcat
+- FireScourge
+- Trevoke]
+  QKGV[390:0.996824:20.7835:17.1008::remote]
+  JD[Tenpo 12-8-13]
+  KTV[1.0]
+  ;W[nc]
+  ;B[qg]
+  ;W[cn]
+  ;B[gq]
+  SQ[gq][qg]
+  CR[pp]
+  C[PJ
+-----
+Even just splitting the board diagonally in two, we see B is covering more of the board than W.
+-----
+
+DOP
+-----
+With the marked stones, giving B the right corner would give him too much strength overall
+-----
+]
+  ;W[pp]
+  ;B[cd]
+  C[PJ
+-----
+B pressure the left side, B goes for an asymmetric game
+-----]
+  ;W[ec]
+  C[PJ
+-----
+W kakari.
+
+W is playing lightly, since this is a handicap game.
+-----]
+  ;B[de]
+  C[META
+-----
+This is not the Shusaku diagonal, but it's always fun to see him play this kosumi.
+
+https://senseis.xmp.net/?ShusakuFuseki
+-----]
+  ;W[ci]
+  C[PJ
+-----
+W framework is thin compared to B.
+
+C11 reduces the flexibility of the D15 stone, which means its value on the board is reduced.
+
+C11 is too far from C6 to consider that the stones are connected.
+-----
+
+DOP
+-----
+B is too weak on top and bottom to make splitting the left side W stones worth it, but that can change.
+
+Must leverage D15 now using the "miai direction" from C11.
+-----
+
+
+GAME
+-----
+W leaves a ton of aji in order to develop the left quickly.
+-----]
+  ;B[fd]
+  LB[cd:+][ci:-][cn:-][de:+][fd:+]
+  C[PJ
+-----
+Develop kosumi. 
+
+Because B played G3, W still has easy access to the corner.
+-----]
+  ;W[gc]
+  C[PJ
+-----
+B top left is settled, there's aji in the descent to F17 but it's too early to choose a side.
+-----
+
+Reading
+-----
+This move is light, but much stronger when W has the ladder. (see B F17)
+-----
+]
+  (
+    ;B[nq]
+    SQ[hq][iq][jq][kq][lq][mq]
+    C[PJ
+-----
+B builds the bottom with an approach.
+-----]
+    ;W[qi]
+    CR[qf]
+    C[PJ
+-----
+Since the bottom side just got larger, W denies the same development by approaching on the right side.
+
+Among other things, this approach enables W to follow-up at R14.
+-----]
+    ;B[pn]
+    C[PJ
+-----
+Q6 limits growth potential in the right.
+-----
+
+DOP
+-----
+Have to split O3 and Q6: if either gets more strength now, Q4 and R11 will be very outmatched
+-----]
+    ;W[oq]
+    C[PJ
+-----
+W starts a joseki
+-----]
+    ;B[np]
+    ;W[oo]
+    C[PJ
+-----
+W wants to keep B split to maintain access to the center. Allowing B to play P5 would seal W in too well.
+-----]
+    ;B[or]
+    ;W[pr]
+    ;B[op]
+    ;W[po]
+    ;B[pq]
+    ;W[qq]
+    C[PJ
+-----
+End of joseki
+-----]
+    ;B[mn]
+    LB[mn:1][np:1]
+    C[PJ
+-----
+1 is not really cuttable. Raising to the 6th line also means that profiting from any probe or ladder-breaker (e.g. M3) is much easier.
+-----]
+    ;W[oq]
+    HO[1]
+    C[Reading
+-----
+Capturing here is intended to reduce the liberties on the marked group, and make the push and cut more dangerous.
+-----]
+    LB[mp:3][mq:2][no:4][nr:1]
+    ;B[ck]
+    C[PJ
+-----
+The good thing about the wide extension is that W's stones on the left are very light and do not need to be defended immediately.
+-----]
+    ;W[no]
+    (
+      ;B[lp]
+      C[Katago
+-----
+Score: B+16.5
+Win rate: B 99.2%
+Estimated point loss: 3.0
+
+Katago wants B to develop the left and top, as B does in game, but a bit differently.
+-----]
+      ;W[mo]
+      C[PJ
+-----
+By allowing W to push through at N5 instead of blocking, further moves in the area will essentially be an extension of W's strong corner group. If B blocked, even though the cut at N4 would be dangerous, W's stones would be cut off from the strong group, making a more even balance of strength.
+-----]
+      ;B[kp]
+      C[PJ
+-----
+N6 and Q6 are aji on the right. No need to save them. 
+
+The bottom is nearly B territory now
+-----]
+      ;W[kn]
+      C[DOP
+-----
+Pushing the left side towards thickness lets B grow the area closest to being territory and develop thickness at the top naturally
+-----]
+      ;B[co]
+      C[PJ
+-----
+Following this standard sequence offers some complexities on the left side since C6 is essentially pre-pincered.
+-----]
+      ;W[dn]
+      ;B[dj]
+      LB[cn:1]
+      C[PJ
+-----
+D10 counterattacks the D6 stones, works well with D15 and F16.
+
+Also acts as pressure on group 1.
+-----
+
+DOP
+-----
+W can build strength with kikashi first: the right time to invade is right before an area becomes territory. It would also be nice if the bottom stones didn't become useful strength in the fight on the left.
+-----
+]
+      ;W[ip]
+      C[PJ
+-----
+Split at the shape point. Both groups are fine independently.
+-----
+
+Reading
+-----
+If B goes to K5, W can live in the corner while B builds significant influence
+
+If B tenuki (e.g. Q17) then W can start to build a loose framework targeting the D10 stone, but it can become a large fight.
+-----
+]
+      SBKV[98.91]
+      (
+        ;B[iq]
+        ;W[gp]
+        C[Reading
+-----
+With this pair of attachments there is a double sente. Whoever wedges will damage the other player's shape while strengthening their own, as in the game.
+-----]
+        ;B[hp]
+        ;W[ho]
+        ;B[hq]
+        ;W[ep]
+        ;B[eq]
+        ;W[do]
+        ;B[cp]
+        (
+          ;W[df]
+          C[Katago
+-----
+Score: B+21.6
+Win rate: B 99.6%
+Estimated point loss: 5.5
+
+Katago wants to shore up the weakness in the bottom wall then develop strength on the right and top.
+
+The bottom wall weakness is urgent for both because, basically, whoever plays there gets nice shape and gives the opponent bad shape (fix aji / create aji)
+-----
+
+PJ
+-----
+W is leaning on B to gain more strength to get the C11 stone out.
+-----]
+          (
+            ;B[cf]
+            C[Katago
+-----
+Score: B+17.8
+Win rate: B 99.4%
+Estimated point loss: 3.7
+
+B should take advantage of W's mistake; once the wall is weak enough, B can develop their own wall on the left
+-----]
+            (
+              ;W[dg]
+              C[Katago
+-----
+Score: B+21.8
+Win rate: B 99.6%
+Estimated point loss: 3.9
+
+Katago has the same idea as W but does it slightly better.
+-----ㅤ​]
+              SBKV[99.64]
+              ;B[cg]
+              C[PJ
+-----
+B pushes to keep W's D13 group floating. This is likely the last move B can play on this side before W is strengthened enough to counterattack the D10 stones.
+
+The good news is, B's group is now stable.
+-----
+
+DOP
+-----
+W doesn't have a lot of good options here: if C11 gets sealed in, B will get a lot of territory and it'll be very hard to catch up.
+-----
+
+Reading
+-----
+B should just take the kikashi at F4 instead. 
+
+W will tenuki from sadness and save C11 but it's a small target compared to the unstable groups that W has in the Southwest area
+-----
+]
+              QKGV[13740:0.995933:21.1437:16.7367::remote]
+              ;W[di]
+              LB[ci:+][dj:-]
+              C[PJ
+-----
+W gets out.
+-----]
+              QKGV[10155:0.996154:23.9145:16.5524::remote]
+              ;B[fj]
+              ;W[ei]
+              ;B[fp]
+              (
+                ;W[fn]
+                C[Katago
+-----
+Score: B+26.9
+Win rate: B 99.7%
+Estimated point loss: 4.9
+
+Katago wants to keep the pressure on the B stones on the left instead of letting them get stronger
+-----
+
+PJ
+-----
+W holds the integrity of the wall.
+-----]
+                ;B[fl]
+                ;W[gk]
+                ;B[ej]
+                ;W[hm]
+                ;B[gj]
+                ;W[gg]
+                (
+                  ;B[io]
+                  C[Katago
+-----
+Score: B+24.2
+Win rate: B 99.6%
+Estimated point loss: 2.8
+
+Katago offers a variation that helps B seal in W with less shape harassment
+-----
+ㅤ​]
+                  (
+                    ;W[hn]
+                    C[Katago
+-----
+Score: B+27.1
+Win rate: B 99.7%
+Estimated point loss: 2.9
+
+Katago wants to stabilize the top group *now*.
+-----]
+                    ;B[hk]
+                    ;W[jk]
+                    LB[gg:2][gj:1][hm:3]
+                    C[PJ
+-----
+There is a clear surrounding fight happening between groups 1, 2, and 3.
+-----]
+                    ;B[jm]
+                    ;W[jn]
+                    ;B[il]
+                    C[PJ
+-----
+B has poked at all the weak points in W "wall". 
+N6 aji is activating
+-----]
+                    ;W[km]
+                    ;B[jj]
+                    ;W[kk]
+                    ;B[gd]
+                    LB[gd:1][gg:2][gj:3]
+                    C[PJ
+-----
+While there is a cut at E16, we can still say group 1 is working to surround group 2.
+More directly, it threatens to take a chunk of the top territory.
+-----]
+                    ;W[hi]
+                    (
+                      ;B[gh]
+                      C[Katago
+-----
+Move 72: B G12
+Score: B+21.4
+Win rate: B 99.5%
+Estimated point loss: 2.5
+
+Katago wants something slightly more peaceful because, well, B's ahead.
+-----
+
+Reading
+-----
+Because of the shortage of liberties on the D13 and D11 groups, if W pushes through G11 B can start a ko to kill more on the left or capture the H11 stone.
+-----]
+                      (
+                        ;W[fh]
+                        C[Katago
+-----
+Score: B+28.0
+Win rate: B 99.8%
+Estimated point loss: 6.6
+
+Katago would rather develop center strength for W here.
+-----
+
+PJ
+-----
+W fixes the elephants eye, developing eye shape and keeping a clear way out into the center.
+-----]
+                        ;B[hh]
+                        ;W[gi]
+                        ;B[ii]
+                        ;W[ih]
+                        ;B[hg]
+                        ;W[fi]
+                        SQ[gi][hi]
+                        C[PJ
+-----
+Since the ladder doesn't work for W, W maintains connection with the two marked stones.
+-----]
+                        ;B[hj]
+                        C[PJ
+-----
+B is now under threat by a push and cut, so B defends.
+-----]
+                        ;W[gf]
+                        C[PJ
+-----
+Extending helps W get out.
+
+If B doesn't respond, the ladder will work for W.
+-----]
+                        ;B[jh]
+                        (
+                          ;W[ig]
+                          C[Katago
+-----
+Move 83: W J13
+Score: B+38.0
+Win rate: B 99.8%
+Estimated point loss: 5.1
+
+Katago says, time to spend that aji to stabilize groups and make the fight smaller.
+-----]
+                          ;B[hf]
+                          ;W[he]
+                          ;B[if]
+                          ;W[jg]
+                          ;B[ge]
+                          C[PJ
+-----
+B cuts, removing the possibility of W running to safety.
+
+Group 1 must now find life inside.
+-----]
+                          (
+                            ;W[hd]
+                            C[Katago
+-----
+Move 89: W H16
+Score: B+40.7
+Win rate: B 99.8%
+Estimated point loss: 2.8
+
+Katago would rather finish living and start to make territory on the right for W
+-----]
+                            ;B[ie]
+                            ;W[id]
+                            SQ[ec][gc]
+                            LB[ie:1]
+                            C[PJ
+-----
+W threatens to kill, while maintaining shape with the marked stones.
+
+B needs to get group 1 out.
+-----]
+                            QKGV[69601:0.998088:43.4987:19.3693::remote]
+                            (
+                              ;B[kf]
+                              LB[gi:1][gj:2]
+                              C[Katago
+-----
+Move 92: B L14
+Score: B+37.4
+Win rate: B 99.8%
+Estimated point loss: 4.1
+
+If I read the katago var correctly, katago wants a ko for semeai between 1 and 2.
+-----]
+                              ;W[kg]
+                              ;B[ke]
+                              SQ[ie][if][ke][kf]
+                              C[PJ
+-----
+B makes a bamboo joint. The group can now make a safe connection to the top right corner.
+-----]
+                              ;W[ch]
+                              C[PJ
+-----
+Bumping here makes for easier eye potential on the side.
+-----]
+                              ;B[ef]
+                              ;W[eg]
+                              ;B[fe]
+                              C[Reading
+-----
+Hilarious power cube tesuji to defend the E14 stone and leave an emergency connection for J14 if the stones get surrounded on the right.
+-----]
+                              ;W[bj]
+                              SQ[gf][gg]
+                              CR[bk]
+                              C[PJ
+-----
+W threatens to go under C9, while making eye shape.
+
+W doesn't care about the marked stones right now since living is much more important.
+-----]
+                              ;B[bl]
+                              ;W[be]
+                              ;B[ce]
+                              (
+                                ;W[bn]
+                                C[Katago
+-----
+Move 103: W B6
+Score: B+40.7
+Win rate: B 99.9%
+Estimated point loss: 4.7
+-----]
+                                ;B[bh]
+                                ;W[bi]
+                                ;B[bg]
+                                ;W[bk]
+                                CR[cl]
+                                C[PJ
+-----
+Once again, making a threat to create eye shape.
+-----]
+                                ;B[dl]
+                                ;W[ak]
+                                ;B[kj]
+                                (
+                                  ;W[kh]
+                                  LB[jg:1]
+                                  C[Katago
+-----
+Score: B+45.2
+Win rate: B 99.9%
+Estimated point loss: 6.3
+-----
+
+PJ
+-----
+W takes time to make sure that group 1 isn't getting surrounded.
+-----
+]
+                                  ;B[al]
+                                  ;W[ai]
+                                  LB[di:1]
+                                  C[PJ
+-----
+Group 1 is now alive.
+-----]
+                                  ;B[lk]
+                                  (
+                                    ;W[fg]
+                                    C[Katago
+-----
+Score: B+56.1
+Win rate: B 100.0%
+Estimated point loss: 9.9
+-----
+
+PJ
+-----
+Taking time to save two stones isn't worth sente right now. This should be left for endgame.
+-----]
+                                    ;B[fc]
+                                    C[PJ
+-----
+B pokes at W's weak shape.
+
+B is also starting to carve out a larger corner.
+-----]
+                                    ;W[kc]
+                                    ;B[jd]
+                                    ;W[ib]
+                                    ;B[jc]
+                                    ;W[jb]
+                                    ;B[lc]
+                                    ;W[ld]
+                                    ;B[kd]
+                                    ;W[kb]
+                                    ;B[md]
+                                    ;W[oe]
+                                    C[PJ
+-----
+W shoulder hits to gain strength and create a ladder breaker.
+-----]
+                                    ;B[mf]
+                                    (
+                                      ;W[li]
+                                      C[Katago
+-----
+Score: B+64.9
+Win rate: B 100.0%
+Estimated point loss: 11.0
+-----]
+                                      (
+                                        ;B[ic]
+                                        C[Katago
+-----
+Score: B+60.3
+Win rate: B 100.0%
+Estimated point loss: 4.6
+-----ㅤ​]
+                                        ;W[lj]
+                                        ;B[kl]
+                                        ;W[hc]
+                                        ;B[fb]
+                                        ;W[hb]
+                                        C[Katago
+-----
+Score: B+70.9
+Win rate: B 99.9%
+Estimated point loss: 8.8
+-----ㅤ​]
+                                        ;B[lb]
+                                        ;W[nd]
+                                        C[Katago
+-----
+Score: B+76.0
+Win rate: B 100.0%
+Estimated point loss: 4.4
+-----ㅤ​]
+                                        ;B[ng]
+                                        C[Katago
+-----
+Move 138: B O13
+Score: B+71.5
+Win rate: B 99.9%
+Estimated point loss: 4.5
+-----]
+                                        ;W[og]
+                                        C[Katago
+-----
+Score: B+80.8
+Win rate: B 100.0%
+Estimated point loss: 9.3
+-----]
+                                        ;B[of]
+                                        C[Katago
+-----
+Score: B+68.7
+Win rate: B 99.9%
+Estimated point loss: 12.1
+
+-----ㅤ​]
+                                        ;W[pf]
+                                        ;B[nf]
+                                        ;W[pe]
+                                        C[Katago
+-----
+Score: B+74.1
+Win rate: B 100.0%
+Estimated point loss: 4.3
+-----]
+                                        ;B[ni]
+                                        ;W[nj]
+                                        ;B[oh]
+                                        ;W[pg]
+                                        ;B[oj]
+                                        ;W[ll]
+                                        ;B[mk]
+                                        ;W[mj]
+                                        C[Katago
+-----
+Score: B+82.9
+Win rate: B 100.0%
+Estimated point loss: 7.2
+-----]
+                                        ;B[jl]
+                                        ;W[ok]
+                                        ;B[ml]
+                                        ;W[mh]
+                                        ;B[nh]
+                                        ;W[pj]
+                                        ;B[lo]
+                                        LB[dn:1][hn:2][kn:3]
+                                        C[PJ
+-----
+1, 2, and 3 are just dead
+-----
+
+B+R
+
+]
+                                        QKGV[823:0.999408:81.6758:14.3103::remote]
+                                      )
+                                      (
+                                        ;B[lb]
+                                        C[]
+                                        ;W[jp]
+                                        C[]
+                                        ;B[jo]
+                                        C[]
+                                        ;W[in]
+                                        C[]
+                                        ;B[ml]
+                                        C[]
+                                        ;W[ng]
+                                        C[]
+                                        ;B[mg]
+                                        C[]
+                                        ;W[mh]
+                                        C[]
+                                        ;B[kl]
+                                        C[]
+                                        ;W[ko]
+                                        C[]
+                                        ;B[jq]
+                                        C[]
+                                        ;W[lo]
+                                        C[]
+                                        ;B[gb]
+                                        C[]
+                                        ;W[ne]
+                                        C[]
+                                      )
+                                    )
+                                    (
+                                      ;W[lb]
+                                      C[]
+                                      ;B[gb]
+                                      C[]
+                                      ;W[pe]
+                                      C[]
+                                      ;B[qe]
+                                      C[]
+                                      ;W[qd]
+                                      C[]
+                                      ;B[pf]
+                                      C[]
+                                      ;W[of]
+                                      C[]
+                                      ;B[qc]
+                                      C[]
+                                      ;W[rd]
+                                      C[]
+                                      ;B[pc]
+                                      C[]
+                                      ;W[re]
+                                      C[]
+                                      ;B[qf]
+                                      C[]
+                                      ;W[ng]
+                                      C[]
+                                      ;B[rf]
+                                      C[]
+                                    )
+                                  )
+                                  (
+                                    ;W[hb]
+                                    C[]
+                                    ;B[pj]
+                                    C[]
+                                    ;W[pg]
+                                    C[]
+                                    ;B[pf]
+                                    C[]
+                                    ;W[of]
+                                    C[]
+                                    ;B[og]
+                                    C[]
+                                    ;W[ph]
+                                    C[]
+                                    ;B[nf]
+                                    C[]
+                                    ;W[oe]
+                                    C[]
+                                    ;B[pe]
+                                    C[]
+                                    ;W[lf]
+                                    C[]
+                                    ;B[le]
+                                    C[]
+                                    ;W[mf]
+                                    C[]
+                                    ;B[me]
+                                    C[]
+                                  )
+                                )
+                                (
+                                  ;W[lj]
+                                  C[]
+                                  ;B[li]
+                                  C[]
+                                  ;W[mj]
+                                  C[]
+                                  ;B[fc]
+                                  C[]
+                                  ;W[kc]
+                                  C[]
+                                  ;B[lg]
+                                  C[]
+                                  ;W[oi]
+                                  C[]
+                                  ;B[qk]
+                                  C[]
+                                  ;W[mg]
+                                  C[]
+                                  ;B[lh]
+                                  C[]
+                                  ;W[rj]
+                                  C[]
+                                )
+                              )
+                              (
+                                ;W[bh]
+                                C[]
+                                ;B[fc]
+                                C[]
+                                ;W[li]
+                                C[]
+                                ;B[bn]
+                                C[]
+                                ;W[hb]
+                                C[]
+                                ;B[gb]
+                                C[]
+                                ;W[hc]
+                                C[]
+                                ;B[fb]
+                                C[]
+                                ;W[ld]
+                                C[]
+                                ;B[lg]
+                                C[]
+                                ;W[kh]
+                                C[]
+                                ;B[kd]
+                                C[]
+                                ;W[kc]
+                                C[]
+                                ;B[qk]
+                                C[]
+                              )
+                            )
+                            (
+                              ;B[kg]
+                              C[]
+                              QKGV[51602:0.998158:43.4018:19.3187::remote]
+                              ;W[jf]
+                              C[]
+                              QKGV[57238:0.998145:43.3505:19.3083::remote]
+                              ;B[je]
+                              C[]
+                              QKGV[51558:0.998181:43.1705:19.3082::remote]
+                              ;W[kf]
+                              C[]
+                              QKGV[48393:0.998330:43.238:19.2407::remote]
+                              ;B[jc]
+                              C[]
+                              QKGV[17686:0.998134:42.8126:19.0483::remote]
+                              ;W[kh]
+                              C[]
+                              QKGV[15758:0.998188:43.0628:18.8416::remote]
+                              ;B[jd]
+                              C[]
+                              QKGV[13755:0.998145:42.5827:18.4109::remote]
+                              ;W[kj]
+                              C[]
+                              QKGV[10088:0.998168:42.9822:18.3839::remote]
+                              ;B[ij]
+                              C[]
+                              QKGV[7550:0.998155:42.8773:18.3641::remote]
+                              ;W[bk]
+                              C[]
+                              QKGV[9755:0.997875:42.1295:18.7135::remote]
+                              ;B[bj]
+                              C[]
+                              QKGV[12227:0.997865:41.5263:18.6195::remote]
+                              ;W[cj]
+                              C[]
+                              QKGV[13166:0.997935:41.5015:18.6402::remote]
+                              ;B[bl]
+                              C[]
+                              QKGV[15870:0.997893:41.2271:18.5663::remote]
+                              ;W[dk]
+                              C[]
+                              QKGV[33267:0.997608:41.5392:18.7984::remote]
+                            )
+                          )
+                          (
+                            ;W[kh]
+                            C[]
+                            ;B[ie]
+                            C[]
+                            ;W[bj]
+                            C[]
+                            ;B[bk]
+                            C[]
+                            ;W[ee]
+                            C[]
+                            ;B[ed]
+                            C[]
+                            ;W[ch]
+                            C[]
+                            ;B[li]
+                            C[]
+                            ;W[mj]
+                            C[]
+                            ;B[kj]
+                            C[]
+                            ;W[lj]
+                            C[]
+                            ;B[mi]
+                            C[]
+                            ;W[nj]
+                            C[]
+                            ;B[lg]
+                            C[]
+                          )
+                        )
+                        (
+                          ;W[ik]
+                          C[]
+                          ;B[ig]
+                          C[]
+                          ;W[ij]
+                          C[]
+                          ;B[he]
+                          C[]
+                          ;W[bj]
+                          C[]
+                          ;B[bk]
+                          C[]
+                          ;W[ch]
+                          C[]
+                          ;B[hl]
+                          C[]
+                          ;W[mk]
+                          C[]
+                          ;B[bm]
+                          C[]
+                          ;W[bn]
+                          C[]
+                          ;B[em]
+                          C[]
+                          ;W[fo]
+                          C[]
+                        )
+                      )
+                      (
+                        ;W[gi]
+                        ;B[eo]
+                        ;W[en]
+                        ;B[fi]
+                        ;W[fh]
+                        ;B[fg]
+                        ;W[hh]
+                        ;B[eh]
+                        ;W[qf]
+                        ;B[gf]
+                        ;W[pg]
+                        ;B[gh]
+                        ;W[hg]
+                        ;B[qk]
+                      )
+                    )
+                    (
+                      ;B[hj]
+                      ;W[ih]
+                      ;B[em]
+                      ;W[hc]
+                      ;B[hd]
+                      ;W[dc]
+                      ;B[ee]
+                      ;W[kj]
+                      ;B[jl]
+                    )
+                  )
+                  (
+                    ;W[ff]
+                    C[]
+                    ;B[gd]
+                    C[]
+                    ;W[hc]
+                    C[]
+                    ;B[gn]
+                    C[]
+                    ;W[cc]
+                    C[]
+                    ;B[bc]
+                    C[]
+                    ;W[dd]
+                    C[]
+                    ;B[cb]
+                    C[]
+                    ;W[dc]
+                    C[]
+                    ;B[ce]
+                    C[]
+                    ;W[ee]
+                    C[]
+                    ;B[gm]
+                    C[]
+                    ;W[ne]
+                    C[]
+                    ;B[of]
+                    C[]
+                  )
+                )
+                (
+                  ;B[hk]
+                  C[]
+                  ;W[be]
+                  C[]
+                  ;B[bd]
+                  C[]
+                  ;W[bm]
+                  C[]
+                  ;B[bj]
+                  C[]
+                  ;W[he]
+                  C[]
+                  ;B[jl]
+                  C[]
+                  ;W[in]
+                  C[]
+                )
+              )
+              (
+                ;W[ej]
+                C[]
+                ;B[ek]
+                C[]
+                ;W[fk]
+                C[]
+                ;B[fl]
+                C[]
+                ;W[gk]
+                C[]
+                ;B[el]
+                C[]
+                ;W[cc]
+                C[]
+                ;B[bc]
+                C[]
+                ;W[dd]
+                C[]
+                ;B[ed]
+                C[]
+                ;W[dc]
+                C[]
+                ;B[bb]
+                C[]
+                ;W[ee]
+                C[]
+                ;B[ce]
+                C[]
+              )
+            )
+            (
+              ;W[fo]
+              C[]
+              ;B[qk]
+              C[]
+              ;W[di]
+              C[]
+              ;B[fj]
+              C[]
+              ;W[cg]
+              C[]
+              ;B[dg]
+              C[]
+              ;W[ef]
+              C[]
+              ;B[bg]
+              C[]
+              ;W[ch]
+              C[]
+              ;B[be]
+              C[]
+              ;W[gf]
+              C[]
+              ;B[ee]
+              C[]
+              ;W[eg]
+              C[]
+              ;B[he]
+              C[]
+            )
+          )
+          (
+            ;B[fp]
+            C[]
+            ;W[cf]
+            C[]
+            ;B[gd]
+            C[]
+            ;W[hc]
+            C[]
+            ;B[di]
+            C[]
+            ;W[bk]
+            C[]
+            ;B[bl]
+            C[]
+            ;W[dc]
+            C[]
+            ;B[ee]
+            C[]
+            ;W[bj]
+            C[]
+            ;B[dl]
+            C[]
+            ;W[ef]
+            C[]
+            ;B[hd]
+            C[]
+            ;W[ic]
+            C[]
+          )
+        )
+        (
+          ;W[fo]
+          C[]
+          ;B[di]
+          C[]
+          ;W[oi]
+          C[]
+          ;B[ob]
+          C[]
+          ;W[gd]
+          C[]
+          ;B[ge]
+          C[]
+          ;W[he]
+          C[]
+          ;B[hf]
+          C[]
+          ;W[if]
+          C[]
+          ;B[ie]
+          C[]
+          ;W[hd]
+          C[]
+          ;B[gf]
+          C[]
+          ;W[ig]
+          C[]
+          ;B[ne]
+          C[]
+        )
+      )
+      (
+        ;B[jo]
+        SBKV[98.71]
+        ;W[fp]
+        SBKV[98.75]
+        ;B[gp]
+        SBKV[98.64]
+        ;W[fq]
+        SBKV[98.66]
+        ;B[fo]
+        SBKV[98.56]
+        ;W[gr]
+        SBKV[98.74]
+        ;B[hr]
+        SBKV[98.61]
+        ;W[er]
+        SBKV[98.64]
+        ;B[go]
+        SBKV[98.53]
+        ;W[eo]
+        SBKV[98.74]
+        ;B[ep]
+        SBKV[98.31]
+        ;W[cq]
+        SBKV[98.76]
+        ;B[bn]
+        SBKV[98.8]
+        ;W[hq]
+        SBKV[98.96]
+        ;B[ir]
+        SBKV[98.86]
+        ;W[bm]
+        SBKV[99.13]
+        ;B[bo]
+        SBKV[98.99]
+        ;W[bq]
+        SBKV[99.21]
+        ;B[bl]
+        SBKV[99.08]
+        ;W[oi]
+        SBKV[99.27]
+      )
+      (
+        ;B[pc]
+        SBKV[98.29]
+        ;W[fo]
+        SBKV[98.47]
+        ;B[eq]
+        SBKV[98.42]
+        ;W[di]
+        SBKV[98.49]
+        ;B[ej]
+        SBKV[98.3]
+        ;W[fh]
+        SBKV[98.37]
+        ;B[ho]
+        SBKV[98.2]
+        ;W[gm]
+        SBKV[98.38]
+        ;B[io]
+        SBKV[98.19]
+        ;W[jo]
+        SBKV[98.14]
+        ;B[jp]
+        SBKV[98.03]
+        ;W[in]
+        SBKV[98.33]
+        ;B[hn]
+        SBKV[98.3]
+        ;W[hm]
+        SBKV[98.38]
+        ;B[im]
+        SBKV[98.35]
+        ;W[jn]
+        SBKV[98.36]
+        ;B[hp]
+        SBKV[98.25]
+        ;W[il]
+        SBKV[98.38]
+        ;B[gj]
+        SBKV[98.19]
+        ;W[hh]
+        SBKV[98.29]
+        ;B[em]
+        SBKV[97.96]
+        ;W[bo]
+        SBKV[98.1]
+        ;B[bm]
+        SBKV[97.34]
+        ;W[bn]
+        SBKV[97.55]
+        ;B[bp]
+        SBKV[96.77]
+        ;W[dl]
+        SBKV[97.11]
+      )
+    )
+    (
+      ;B[mo]
+      ;W[mp]
+      ;B[pq]
+      ;W[lp]
+      ;B[ek]
+      ;W[mq]
+      C[]
+      ;B[nr]
+      C[]
+      ;W[jp]
+      C[]
+      ;B[ic]
+      C[]
+      ;W[gd]
+      C[]
+      ;B[ge]
+      C[]
+    )
+  )
+  (
+    ;B[fc]
+    ;W[fb]
+    ;B[gb]
+    ;W[eb]
+    ;B[hc]
+  )
+)

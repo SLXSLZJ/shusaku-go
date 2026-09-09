@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "mimosa-hook-status/v1",
+  "recordedAt": "2026-09-09T11:14:21.030Z",
+  "sessionId": "sess_73e0159a-34ae-41da-875b-eea39ca05ee3",
+  "event": "PostToolUse",
+  "toolName": "Edit",
+  "file": "C:\\Users\\NewUser\\shusaku-go\\src\\App.tsx",
+  "outcome": "inconclusive",
+  "coverage": "partial",
+  "findingCount": 0,
+  "durationMs": 6,
+  "hostState": "hook_complete",
+  "reportHint": ".mimosa/reports/"
+}

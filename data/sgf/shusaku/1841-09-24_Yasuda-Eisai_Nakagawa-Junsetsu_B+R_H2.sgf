@@ -1,0 +1,589 @@
+(;FF[4]GM[1]CA[UTF-8]AP[q5go:2.1.3]
+SZ[19]
+PW[Nakagawa Junsetsu]
+PB[Yasuda Eisai]
+WR[5d]
+BR[1d]
+KM[0]
+DT[1841-09-24]
+RU[japanese]
+HA[2]
+RE[B+R]PL[W]AB[dp][pd]
+C[Shusaku Study Project
+
+commentary v1.0
+CHANGELOG
+-----
+Added PJ, DOP, Reading
+-----
+
+Contributors to v1.0
+Katago:
+- Trevoke
+
+PJ:
+- Trevoke
+- bugcat
+- D-E
+
+DOP:
+- Trevoke
+
+Reading:
+- No one :(]QKGV[372:0.996271:19.3745:17.2666::remote]JD[Tenpo 12-8-10]KTV[1.0]
+;W[cn];B[gq];W[cq]
+C[PJ
+-----
+W contests the corner. The following sequence can end with W living in the corner and C6 left alone.
+This is probably one of the few truly sente moves on the board.
+-----
+
+HISTORY
+-----
+It's interesting to note that this move is typically presented as the "refutation" of G3, and the reason that it moved to F3 in the shin fuseki period of the 1930s. It's said that the 3-3 invasion is too easy, and players facing G3 today are usually advised to dive in immediately. 
+
+Since players of the 1840s clearly knew that C3 was a playable move, their perception of G3 was apparently based on their evaluation of the result of the C3 invasion, not ignorance of its possibility.
+-----
+
+DOP
+-----
+B can play calmly *and* keep W split, so that seems to be the only option here.
+-----]
+;B[cp]
+C[PJ
+-----
+B has to sagari (descend) here to keep the W corner contained.
+
+If B were to asgari at D3, C6 would allow W to easily run out of the corner.
+-----]
+;W[bp];B[bo];W[bq];B[co];W[er];B[eq];W[dq];B[fq]TR[bn][ep]
+C[PJ
+-----
+End of a forced sequence. W has local forcing moves.
+
+W is entirely sealed in.
+-----
+
+DOP
+-----
+Facing top-right corner is equivalent, so which of left or right is more interesting? Right is more open.
+-----
+
+Reading
+-----
+B can descend at F2 here; if B can follow-up, B can kill the corner.
+This means F2 is often sente and the corner is ~6 points, and can live in ko
+-----]
+(;W[pq]
+C[PJ
+-----
+W opens the right side, building more of the board to develop a plan to deal with B's thickness.
+-----]
+;B[ce]
+C[PJ
+-----
+Thickness needs an extension, goes the proverb. This 5-3 is a bit far to be an extension, but adds flexibility to B's left side position (corner, left side, top are options)
+-----]
+;W[dc]TR[cc]
+C[PJ
+-----
+White is looking for cash, to go with that which he's taken in the bottom side corners. AI tends to recommend the C17 invasion (sq.), but there's no meaningful difference in this position. In either case, Black will press and build the left.
+-----]
+;B[fd]
+C[PJ
+-----
+B offers the taisha.
+-----]
+;W[de]
+C[PJ
+-----
+W accepts the taisha
+-----]
+;B[dd];W[ed];B[cd];W[ec];B[ee];W[df];B[cc];W[cb]
+C[HISTORY
+-----
+Waltheri suggests that (25), the hane, was a short lived trend from 1835 to 1846, maybe 1849. Call that range 1830-1850, since Waltheri is nowhere near complete. In 1835 and 1937, two players used it against Shuwa, first Hiki Genjiro and then Hayashi Hakuei. In 1840, Shuwa took the hint and played it against Ito Showa. This Shusaku game is from the year after that, and the first game that didn't involve Shuwa. I suspect that Shuwa, as Shusaku's teacher, introduced the move to him.
+
+Shusaku used it twice more, in 1844 and 1846. The only game involving neither Shuwa nor Shusaku was Hayashi Hakuei vs Sakaguchi Sentoku II, 1844 (apart from one outlier from the 1970s)
+
+interestingly, Waltheri's incidences of the ordinary (outward turn) taisha also peak in 1840-50, between it having no appearances in both the previous and following decades
+
+Shusaku played another game against Nakagawa Junsetsu, in the same year (I guess later), and in that game Nakagawa played the jump (27) without the hane exchange. This is the only instance Waltheri has of a "raw" jump. However, it was the dominant move in the hane exchange line (six games vs three for the turn); so I think we can make a fairly concrete speculation that the point of the hane exchange was considered to be to set up the jump in some way.
+
+Shusaku's (28) was not the main move, which was to connect. The only other person who played Shusaku's move was Ito Showa, in his game against Shuwa. This strengthens the argument that Shusaku was taught this variation by Shuwa. In 1835 and 1837, Shuwa had also been playing the connection, so the push up was an improvement that he'd thought he'd found, or at least a tricky Honinbo secret move. 
+
+all the way up to and including (35) is the same as in Ito Showa vs Shuwa, 1840, from the year before this Shusaku game. The divergence is that Shusaku played (36) D11 where Shuwa played D10
+-----]
+;B[bb];W[gc];B[ef];W[cf]
+C[PJ
+-----
+Black has been sealed in. 
+
+White is trying to break the left side.
+-----]
+;B[db]
+C[PJ
+-----
+Living with the group.
+-----]QKGV[10151:0.994285:17.5863:17.3129::remote]
+(;W[fc]LB[cf:1][ef:3][fc:2]
+C[Katago
+-----
+Score: B+21.8
+Win rate: B 98.8%
+Estimated point loss: 3.2
+Predicted top move was E18 (B+11.4).
+PV: WE18 E13 D19 B14 B6 A6 C9 C12 E6 E5 B15 B16 F6 F2 
+
+The above "preferred variation" is eerily similar to how Shuwa played in the game from May 12th, 1840  (you can find it here: https://blog.trevoke.net/shusaku/#progress )
+
+The AI, when prodded more gently, considers this a mistake because it leads to a path (almost followed in the main variation) where B can seal in W.
+
+-----
+
+PJ
+-----
+Now W is in real risk of being sealed in, which would really hurt group 1 and the C6 stone.
+By contrast, the group 2 has 5 liberties, so they're fine. They are undercut but they can reach for a base, and have forcing moves around F16.
+Group 3 can harass group 1, so it's fine too.
+-----]QKGV[2678:0.996384:21.86:18.6154::remote]
+;B[eg]QKGV[384:0.996348:21.7625:18.5484::remote];W[be];B[bd];W[ch]
+C[PJ
+-----
+White has the advantage of being on the side, where he can make eyes. Black is pressing from above, and has the local advantage due to his many nearby friendly stones, but his floating group may nevertheless be vulnerable later.
+-----]
+;B[di];W[ad];B[ca];W[bg]QKGV[1890:0.996392:23.4957:19.1796::remote]
+(;B[ac]LB[ch:1][ef:3][fc:2]
+C[Katago
+-----
+Score: B+19.3
+Win rate: B 98.6%
+Estimated point loss: 3.1
+
+Here B makes a "mistake" and allows W to not get sealed in. 
+This move also removes W's A18 potential for creating a ko, which would help the bottom left.
+
+Comparing the variations, we do find that the main game keeps the center more open, whereas the AI-suggested variation would lead to a running fight.
+
+B can afford this inefficiency to keep the game simpler, because of the two-stone handicap.
+-----
+
+PJ
+-----
+Now W is in real risk of being sealed in, which would really hurt group 1 and the C6 stone.
+By contrast, the group 2 has 5 liberties, so they're fine. They are undercut but they can reach for a base, and have forcing moves around F16.
+Group 3 can harass group 1, so it's fine too.
+-----]QKGV[2813:0.996152:19.355:18.0696::remote]
+;W[cj]LB[ch:1][ef:3][fc:2]
+C[PJ
+-----
+Group 1 acquires a base.
+Now group 2 is weak.
+Group 3 is correspondingly strengthened.
+-----
+
+
+DOP
+-----
+B is going to give this group a way out in order to build the direction he wants -- top->center -- in sente, to combine with the existing wall, and prep an approach to the bottom-right corner
+-----]QKGV[159:0.996039:19.8582:18.2892::remote]
+;B[hd]
+C[PJ
+-----
+Black pressures White from the other side. These two rounds of immediate attack are important to bolster his floating group, which still has no eyes.
+-----]
+;W[gd];B[ge];W[hc];B[id]
+C[PJ
+-----
+B doesn't mind the atari stone at F16. It's best to just nobi and exchange the one stone to prevent W from leaving the inside.
+-----]
+;W[fe];B[gf];W[jc]
+C[PJ
+-----
+White is moving onto the side, making eyespace.
+-----]
+;B[ke]
+C[PJ
+-----
+B is developing some good thickness.
+-----]
+;W[mc]TR[ke][mc][pd]
+C[PJ
+-----
+W finally claims a base.
+
+W also contests the connection between the two B triangle stones.
+-----]
+;B[kc]
+C[PJ
+-----
+B threatens to capture; direct impact is to keep W pressed down while B builds more thickness
+-----]
+;W[kb];B[ic]
+C[PJ
+-----
+B threatens capture again
+-----]
+;W[ib];B[jd];W[jb]
+C[PJ
+-----
+Now B has thickness, W is pressed low, and all groups are relatively settled.
+
+The right side is the next big open area.
+-----]
+;B[qo]
+C[DOP
+-----
+W has no interest in developing anything on the left side, and doesn't want to give B an easy way to develop more center strength, so we need a direction change, and that means pincer.
+-----]
+;W[qk]TR[fr]MA[ae]LB[bb:1][bg:4][cq:3][dp:5][fc:2][gf:6][pd:7][pq:10][qk:8][qo:9]
+C[PJ
+-----
+Group status check on the eve of the pincer fight.
+
+Groups 1,2,3: alive
+
+Group 4: almost definitely alive. White does have to watch out for the X capture.
+
+Group 5: has some issues, but has F2 (Δ) and an extension onto the side so isn't under much threat.
+
+Group 6: has no eyes and no base, and no means of extending onto a side. However, has good shape and a large area.
+
+Group 7: a 4-4, so naturally threatened by the possibility of a 3-3 invasion. But for now it can extend to the south, along the right side.
+
+groups 8, 9: entering combat. Unsettled.
+
+group 10: also preparing for battle, but based in the corner so unlikely to come into any danger. 
+-----]
+;B[qq]
+C[PJ
+-----
+Attaching for shape.
+-----]
+;W[qr]
+C[PJ
+-----
+This feels like an attempt to revert to a joseki sequence.
+-----]
+;B[pp];W[oq];B[rq]
+C[DOP
+-----
+W really needs to stabilize group 1. Group 2 isn't completely stable either, so it's a fair trade.
+-----]
+;W[qh]LB[oq:1]
+C[PJ
+-----
+White leaves group 1 open to attack.
+-----
+
+GAME
+-----
+This could be a teaching game thing, it could be a 2H thing, it could be a mistake. It's risky for sure.
+-----]
+;B[lp]LB[fq:1][oq:2]
+C[PJ
+-----
+This move makes ladder breakers.
+It also closes W's turn at P4 (see variations)
+It also reinforces group 1 slightly, building a framework to face the thickness above.
+It also threatens to capture group 2.
+-----]
+(;W[lr]
+C[PJ
+-----
+This moves makes life and reactivates the P4 cut (in the sense that B can't resist it). As W turns, see variation when W does.
+-----]
+;B[kr]
+C[PJ
+-----
+B closes the bottom side to the group, squeezing it towards the center
+-----]
+;W[op]
+C[PJ
+-----
+Keep B separated. This will force B to get two eyes or run into the center somehow.
+-----]
+;B[oo];W[no]
+C[DOP
+-----
+B is going to be content to loom over R9, now that the bottom is closed off and W's only way out is in the center, where there are, famously, no points.
+-----]
+;B[on];W[lq];B[kq];W[mp];B[lo]
+C[PJ
+-----
+White lives, and even in sente. Black does have some forcing moves, but I wouldn't be unhappy as White. Black is farming a decent crop of central potential though.
+-----]
+;W[nn]
+C[PJ
+-----
+White resists being sealed in. Otherwise Black's central potential would _really_ chub up.
+-----]
+;B[rr]LB[mo:C][mr:B][pr:A]
+C[PJ
+-----
+Secure eye shape for B group, otherwise it could pressured unpleasantly (see P7 hane, R6 attachment)
+
+B is, of course, threatening A. But the clamp B is also possible. And C falsifies O4. 
+
+W's thickness is beginning to come together.
+-----
+
+
+DOP
+-----
+O6 is peeking its head out, separating B's strength. The plan is now to make it as hard as possible for B to combine its strength into a fortress. The next easiest point of leverage is going to be the E4 cut.
+-----]
+;W[dn]TR[ep]
+C[PJ
+-----
+Start to contest B's thickness.
+Grow the left side.
+Activate E4.
+-----
+
+DOP
+-----
+B can aim to seal in W while growing the right side and threatening R9 further
+-----]
+;B[nm]LB[nn:1][qk:2]
+C[PJ
+-----
+Separate groups 1 and 2.
+Threaten to seal in and get a lot of strength facing the center.
+-----]
+;W[mn]
+C[PJ
+-----
+B is separated
+W is still out into the center
+-----]QKGV[603:0.996917:17.3661:15.6934::remote]
+;B[qg]LB[qh:1]
+C[PJ
+-----
+Group 1 is contested: limited eye space, center access could be limited
+-----]QKGV[413:0.995711:15.7603:15.4855::remote]
+;W[rg];B[rf]QKGV[2221:0.992968:15.5685:16.0071::remote];W[jp]QKGV[728:0.994518:17.145:16.3828::remote];B[kp]QKGV[10606:0.992598:16.3648:16.6101::remote]
+(;W[jo]
+C[Katago
+-----
+Score: B+19.8
+Win rate: B 98.6%
+Estimated point loss: 3.1
+Predicted top move was R14 (B+9.7).
+
+This move is a mistake, primarily because the game variation allows B to keep W more unsettled towards the center.
+
+It's worth noting that the main variation and the AI variation lead to very similar results with this one difference.
+------
+ㅤ​]QKGV[3940:0.995627:19.4277:16.4704::remote]
+;B[fr]LB[jo:1]
+C[PJ
+-----
+If B plays D2, the bottom left corner is dead - the corner is 6 points for W and 14 or so for B.
+
+If the corner dies, B6 is no longer sente, and group 1 is floating much more dangerously.
+-----]QKGV[262:0.995550:18.1413:16.4588::remote]
+;W[qf]
+C[PJ
+-----
+So the follow-up to this move must be bigger than the 20-point swing of the corner on the bottom left (almost like a ponnuki is worth 30 points or something).
+
+This means the next few moves are kind of forced
+-----]QKGV[6521:0.995984:18.756:16.3804::remote]
+;B[pg];W[re];B[rh]
+C[PJ
+-----
+B is sacrificing his corner to press into W's group.
+-----]
+;W[sf];B[qi];W[om]
+C[PJ
+-----
+W preps for R6, knowing that B needs to take R12
+-----]
+;B[ph]QKGV[681:0.993423:16.7308:15.76::remote];W[qn]QKGV[549:0.993261:17.0824:15.7995::remote];B[pm];W[ol];B[pn];W[pl];B[qm]
+C[PJ
+-----
+B is now alive, useful forcing sequence is over
+-----]
+;W[pf]TR[mc][pf]
+C[PJ
+-----
+W reinforces towards the corner. Triangle stones now see each other clearly
+-----]
+;B[ml]
+C[PJ
+-----
+W stones in the right side are almost sealed in, and B is continuing to develop center strength
+-----]
+;W[mk]
+C[PJ
+-----
+W uses the most severe move to try to get out into the center
+-----]
+;B[lk]
+C[PJ
+-----
+B is contesting W's path to the center
+-----]
+;W[ll];B[lm];W[kl];B[mm];W[ln];B[km];W[kn];B[nk];W[mj];B[jm];W[oi];B[ng]QKGV[17321:0.994410:22.4994:17.4595::remote]
+(;W[jl]
+C[Katago
+-----
+Score: B+27.1
+Win rate: B 99.2%
+Estimated point loss: 4.1
+
+The AI-preferred variation here is to use J3 to split L3, but it becomes a complex fight in the center. In the next 12 moves, we have 5 moves that are 3+ pts mistake, from both players, so we can accept that this was too complicated for both.
+-----ㅤ​]QKGV[9089:0.996765:26.9008:17.7061::remote]
+;B[im]QKGV[2612:0.995866:23.9457:17.0238::remote];W[nl]
+C[Katago
+-----
+Score: B+30.3
+Win rate: B 99.2%
+Estimated point loss: 3.2
+
+The best move is still J3, but it also still leads to a complex fight in the center.
+
+Worth noting that at this point, AI thinks B gained a whole stone's worth of final points (B+30!).
+-----ㅤ​]QKGV[36723:0.996789:30.3316:19.6087::remote]
+;B[pj]
+C[Katago
+-----
+Score: B+25.1
+Win rate: B 99.1%
+Estimated point loss: 3.0
+
+AI still wants J3 for B too, but it's still a fight in the center. B's plan on the board is simpler, and he can afford it because he's up in points
+-----
+ㅤ​]QKGV[10429:0.996763:25.1325:17.7634::remote]
+;W[oj]QKGV[3978:0.996505:25.1469:17.6911::remote];B[lj]QKGV[32444:0.994161:21.5894:18.2415::remote]
+(;W[il]
+C[Katago
+-----
+Score: B+27.0
+Win rate: B 99.2%
+Estimated point loss: 4.6
+
+This seems like continuing to avoid this center fight, but it's more and more mistakes, and it's strange given that W is a 5P, makes you wonder if this was a teaching game.
+-----ㅤ​]QKGV[40283:0.996974:27.1856:17.4442::remote]
+;B[mi]QKGV[5142:0.996451:26.6377:17.9371::remote];W[nj]QKGV[11948:0.996859:26.9696:17.7892::remote];B[hm]QKGV[12696:0.996799:26.9619:17.8189::remote];W[li]QKGV[8216:0.997200:26.9473:17.823::remote];B[kj]QKGV[7496:0.997243:26.6459:17.7113::remote];W[pi]QKGV[9382:0.998674:29.839:15.9075::remote]
+(;B[qj]
+C[Katago
+-----
+Score: B+24.8
+Win rate: B 99.3%
+Estimated point loss: 4.0
+
+The AI wants to play at M12 and let W live, sealed in. It's a neater result for center territory.
+-----
+
+GAME
+-----
+Seems like the second time this game Shusaku makes  a "mistake" on the inside of the fight. In the top left he could have sealed in the group  and let it live but played on the inside instead, preventing it from being alive, which gives Shusaku the option to prod it further.
+-----ㅤ​]QKGV[48455:0.997355:25.2078:16.2122::remote]
+;W[nh]QKGV[367:0.997576:27.3372:16.8635::remote];B[of];W[lh];B[iq]QKGV[9554:0.997444:25.6068:16.7752::remote]
+(;W[eo]
+C[Katago
+-----
+Score: B+37.5
+Win rate: B 99.1%
+Estimated point loss: 5.1
+
+Katago says E5 is wrong direction because it gives B the opportunity to harass the K5 group.
+
+With H5, W would essentially begin yose.
+-----]QKGV[68532:0.995412:37.5764:19.3747::remote]
+;B[nr]QKGV[38200:0.994904:38.9413:19.0358::remote];W[mr]
+C[Katago
+-----
+Score: B+40.3
+Win rate: B 99.2%
+Estimated point loss: 5.0
+
+This far in the game, it's very hard for W to find a good path forward. This guarantees some profit, though it gives B sente.
+-----
+ㅤ​]QKGV[12284:0.996016:40.2362:18.6407::remote]
+;B[ls];W[ms];B[nq];W[mq];B[or];W[go];B[ho];W[hp];B[ip];W[io];B[hn];W[gp];B[hq];W[hl];B[fo];W[fn]
+;B[gn]QKGV[8423:0.999140:46.6658:13.5284::remote];W[fp]LB[hm:1]
+C[Katago
+-----
+Score: B+60.0
+Win rate: B 99.5%
+Estimated point loss: 11.4
+
+Unclear why W didn't give up the three stones, taking the four B stones is a good trade. Clearly it keeps pressure on group 1 but that group is fairly safe. Maybe a last-ditch effort to stand in the big fight?
+-----ㅤ​]QKGV[26281:0.996472:59.9086:21.659::remote]
+;B[ep];W[fo];B[gl];W[gk];B[fl];W[fk];B[el];W[dj];B[hk];W[jj];B[cl];W[bn]QKGV[68627:0.998135:64.5381:19.9674::remote];B[bl]
+C[Katago
+-----
+Score: B+60.7
+Win rate: B 99.5%
+Estimated point loss: 7.6
+
+The "best" move for B would be H10 but B does not need to complicate anything further, because, well, W is dead.
+-----ㅤ​]QKGV[21081:0.996156:60.6611:22.915::remote]
+;W[ao]QKGV[30484:0.996938:60.129:21.819::remote];B[np]
+C[Katago
+-----
+Score: B+44.9
+Win rate: B 99.8%
+Estimated point loss: 10.0
+
+"Please resign".
+AI still wants H10.
+-----
+ㅤ​]QKGV[2503:0.998801:50.3836:17.2672::remote]
+;W[lf];B[md];W[ne]LB[oe:C][qc:B]QKGV[14936:0.999003:57.6301:17.5589::remote]
+(;B[ql]
+C[Katago
+-----
+Score: B+50.3
+Win rate: B 99.8%
+Estimated point loss: 5.6
+
+B should push at P15 for more "correct" endgame but frankly B has points to burn and just wants to close the game out.
+-----ㅤ​]QKGV[4570:0.998865:49.9544:16.175::remote]
+(;W[le]
+C[Katago
+-----
+Score: B+55.7
+Win rate: B 99.9%
+Estimated point loss: 4.1
+
+
+W should close at P15, too
+-----ㅤ​]QKGV[4692:0.999270:55.6322:15.494::remote]
+;B[ld];W[nd];B[ej];W[ek];B[dk];W[ei];B[fj];W[gj];B[fi];W[hj];B[gi];W[hi];B[hh];W[ih];B[hg];W[dh]QKGV[14625:0.996535:56.418:18.7691::remote]
+(;B[if]
+C[Katago
+-----
+Score: B+48.7
+Win rate: B 99.8%
+Estimated point loss: 8.3
+
+B says "May I have 3 points here please". Technically a mistake, but ... Yet another please-resign move, closing out options. B is up 50 points.
+
+W resigns.
+-----ㅤ​]QKGV[8115:0.998702:48.8356:16.1517::remote])
+(;B[eh];W[bk];B[al];W[bi]QKGV[3398:0.997901:54.9536:16.453::remote];B[oe];W[qc];B[pc];W[qb]QKGV[1246:0.998868:53.8413:15.2688::remote]))
+(;W[oe]QKGV[2244:0.999306:48.8697:14.0893::remote];B[ej];W[dk];B[ek]QKGV[2365:0.999473:47.8426:12.9095::remote];W[dl]QKGV[1771:0.999488:48.3669:12.6658::remote];B[nc];W[mb]QKGV[931:0.999513:48.3085:11.6475::remote];B[mg];W[ki]QKGV[564:0.999413:48.4044:10.4541::remote];B[rc];W[pe]QKGV[176:0.999612:48.7985:10.5036::remote]
+;B[nd]QKGV[670:0.999450:46.9896:11.1381::remote];W[pc];B[pb];W[qc];B[qb];W[oc];B[ob]QKGV[144:0.999446:45.8648:9.09486::remote];W[rd]QKGV[234:0.999630:46.2995:8.41735::remote];B[nb]QKGV[93:0.999614:46.3012:9.11985::remote];W[rb]QKGV[184:0.999478:47.7321:10.7508::remote]))
+(;B[oe]QKGV[9640:0.999051:57.1382:17.4475::remote];W[qc]QKGV[6376:0.999058:57.529:17.4477::remote];B[qd];W[rd];B[qb];W[rc]QKGV[1306:0.999069:57.3172:17.1621::remote];B[lc];W[lb]QKGV[1861:0.999105:57.2107:16.8074::remote];B[hj];W[ii]QKGV[1520:0.999262:56.2365:15.9384::remote];B[ek]
+;W[ei]QKGV[345:0.999334:55.5547:15.0508::remote];B[dr]QKGV[549:0.999419:54.1277:13.9856::remote];W[fm];B[gm]QKGV[1535:0.999459:53.0111:13.2234::remote];W[cr];B[es]QKGV[2057:0.999455:52.5833:12.5196::remote];W[em]QKGV[585:0.999434:53.3876:13.0616::remote]))
+(;W[ho];B[eo]QKGV[4172:0.997358:25.5355:16.7032::remote];W[mg]QKGV[2093:0.997702:25.74:16.3536::remote];B[mf];W[lf];B[me]QKGV[479:0.997566:25.1578:16.1558::remote];W[bn];B[hl];W[mr]QKGV[202:0.998656:24.9954:13.9916::remote];B[rd]QKGV[777:0.998677:24.7901:14.0901::remote];W[ij]QKGV[352:0.998549:25.1425:14.464::remote]))
+(;B[lh];W[qj]QKGV[7791:0.998761:29.6706:15.6642::remote];B[iq];W[mr]QKGV[2853:0.998903:29.5674:14.7011::remote];B[ek];W[bn];B[ck]QKGV[859:0.998926:29.0287:14.1572::remote];W[dj];B[ej]QKGV[915:0.999036:28.6209:13.6765::remote];W[dk]QKGV[504:0.999036:29:13.6002::remote];B[dl]QKGV[811:0.998998:28.7235:13.5662::remote]
+;W[ci]QKGV[783:0.999079:29.1708:13.2295::remote];B[em]QKGV[776:0.999152:28.6481:12.9383::remote];W[cl]QKGV[509:0.999163:28.798:12.3301::remote];B[nd]QKGV[212:0.999215:28.2318:12.0867::remote]))
+(;W[li]QKGV[4597:0.994794:21.95:17.9754::remote];B[mi]QKGV[12135:0.994421:21.8436:18.0424::remote];W[nj]QKGV[22227:0.994404:21.909:18.1318::remote];B[kj]QKGV[21402:0.994365:21.7291:18.12::remote];W[ki]QKGV[29223:0.994378:21.7:18.0795::remote];B[jj]QKGV[24478:0.994197:21.6138:18.142::remote];W[ji]QKGV[13024:0.994714:21.4874:17.5053::remote];B[ij]QKGV[34991:0.994756:20.8502:17.9586::remote]
+;W[mh];B[iq]QKGV[19715:0.994946:20.6787:17.7031::remote];W[eo]QKGV[6884:0.995381:20.6866:17.7174::remote];B[nh]QKGV[7943:0.995394:20.6098:17.6717::remote];W[ni]QKGV[5296:0.996310:20.6982:17.2243::remote];B[hn]QKGV[4019:0.996429:20.284:17.044::remote];W[mr]QKGV[2891:0.996635:20.797:17.1998::remote];B[ne]QKGV[1665:0.996558:20.4356:16.3829::remote];W[mf]QKGV[2378:0.996625:20.9387:16.6136::remote]
+;B[oe]QKGV[2019:0.996379:20.8469:16.8636::remote];W[qc]QKGV[1329:0.996215:21.9298:18.0121::remote]))
+(;W[iq]QKGV[12690:0.994348:22.8592:17.6044::remote];B[jl]QKGV[10507:0.994089:22.6613:17.6102::remote];W[eo]QKGV[6969:0.994078:22.9779:17.8855::remote];B[ep]QKGV[5951:0.993932:22.7983:17.9783::remote];W[dr]QKGV[3653:0.993956:23.1065:17.9135::remote];B[ir]QKGV[3271:0.993860:23.0237:17.8498::remote];W[hr]QKGV[3714:0.993895:23.1448:17.85::remote];B[hq]QKGV[7616:0.994016:22.9127:17.7922::remote]
+;W[jr]QKGV[8059:0.994228:23.1289:17.8293::remote];B[jq]QKGV[9813:0.994126:22.9322:17.824::remote];W[is]QKGV[11435:0.994125:22.8447:17.8745::remote];B[ip]QKGV[10511:0.993994:22.7103:17.8273::remote];W[ir]QKGV[9986:0.994112:22.8876:17.8599::remote];B[io]QKGV[6107:0.994119:22.3211:18.122::remote]))
+(;W[qf]QKGV[5917:0.992598:16.3866:16.5853::remote];B[pg]QKGV[7137:0.992597:16.3102:16.5606::remote];W[re]QKGV[12612:0.992590:16.524:16.638::remote];B[rh]QKGV[15059:0.992474:16.4735:16.6684::remote];W[sf]QKGV[15040:0.992462:16.5564:16.7481::remote];B[qi]QKGV[14358:0.992267:16.3939:16.7526::remote];W[om]QKGV[12767:0.992711:16.5604:16.7734::remote];B[ph]QKGV[11779:0.992423:16.4681:16.8355::remote]
+;W[qn]QKGV[11787:0.992633:16.6494:16.8779::remote];B[pm]QKGV[13827:0.992144:16.6455:17.0504::remote];W[ol]QKGV[14626:0.992300:16.7481:17.1367::remote];B[pn]QKGV[8116:0.992316:16.426:16.9274::remote];W[ok]QKGV[4804:0.991916:16.9903:17.4984::remote];B[ml]QKGV[2857:0.991568:16.8471:17.7434::remote];W[qm]QKGV[3506:0.991453:16.9626:17.8604::remote];B[pl]QKGV[2086:0.990837:16.459:17.8205::remote]
+;W[ql]QKGV[5089:0.991430:16.2201:17.5631::remote];B[ro]QKGV[5272:0.991268:16.0658:17.5358::remote];W[pk]QKGV[24835:0.992365:15.8139:16.5809::remote];B[po]QKGV[23294:0.992339:15.6215:16.3991::remote];W[mj]QKGV[12864:0.993800:15.5377:15.4626::remote];B[km]QKGV[11522:0.993781:15.3616:15.3593::remote];W[mm]QKGV[8292:0.994095:15.6035:15.2213::remote];B[qd]QKGV[5574:0.994152:15.3693:15.0822::remote]))
+(;W[op];B[oo];W[no];B[np];W[mp];B[nq];W[mq];B[nr];W[pr];B[mr];W[lq];B[mo];W[nn];B[lr];W[kq]))
+(;B[cj];W[dg]QKGV[247:0.996385:24.526:18.9735::remote];B[af]QKGV[254:0.996092:24.3576:19.134::remote];W[eh]QKGV[596:0.996229:24.5697:18.9288::remote];B[dh]QKGV[1028:0.996229:23.8861:18.6507::remote];W[bf]QKGV[1017:0.995935:24.284:18.9642::remote];B[bi]QKGV[949:0.996262:23.521:18.8145::remote];W[fh]QKGV[1503:0.996403:23.4956:18.7588::remote];B[gf]QKGV[2167:0.996461:23.1579:18.6718::remote]
+;W[bh]QKGV[571:0.996603:23.5516:18.5216::remote];B[hd]QKGV[290:0.996600:23.2518:18.4199::remote]))
+(;W[eb]QKGV[8722:0.994710:17.6785:17.2265::remote];B[eg];W[da];B[bf]QKGV[7936:0.994558:17.3644:17.1627::remote];W[bn]QKGV[641:0.994780:17.5917:17.1041::remote];B[pp]QKGV[285:0.994745:17.3371:17.1152::remote];W[qq]QKGV[299:0.995026:17.8081:17.1678::remote];B[op]QKGV[201:0.994859:17.5051:17.0944::remote];W[oq]QKGV[201:0.995347:17.9245:17.0412::remote]
+;B[np]QKGV[122:0.994998:17.1875:16.9375::remote];W[mr]QKGV[442:0.995456:17.297:16.6821::remote];B[qp]QKGV[534:0.995618:16.8784:16.5368::remote];W[ao];B[eo]QKGV[314:0.996020:17.0894:16.458::remote];W[qi];B[qf]QKGV[184:0.995854:17.0853:16.6931::remote]))
+(;W[]TR[bn][ep];B[fr];W[dr];B[ap];W[aq];B[es];W[ds];B[bs];W[br];B[cs];W[as];B[ar]))

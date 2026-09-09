@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.local
+*.log
+
+# 模型文件不入 git（约 190MB）：由 scripts/fetch-models.mjs 在构建时下载
+public/models/*.bin.gz
+.mimosa/

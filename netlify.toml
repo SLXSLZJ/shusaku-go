@@ -1,0 +1,30 @@
+# Netlify 静态托管配置。模型文件不入 git，构建时自动下载（约 190MB，首次构建多花 1-2 分钟）
+
+[build]
+  command = "npm ci && node scripts/fetch-models.mjs && npm run build"
+  publish = "dist"
+
+# 跨源隔离：AI 的多线程 WASM（SharedArrayBuffer）必需。
+# 缺失时引擎自动退化为单线程，能玩但明显变慢。
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
+
+# 模型与 wasm 二进制：内容不变式，永久缓存（文件名含版本，更新即换 URL）
+[[headers]]
+  for = "/models/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/tfjs/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# SPA 兜底（本项目为单页，无路由，保险起见）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

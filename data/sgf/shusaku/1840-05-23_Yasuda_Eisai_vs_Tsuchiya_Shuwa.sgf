@@ -1,0 +1,637 @@
+(;FF[4]GM[1]CA[UTF-8]AP[q5go:2.1.3]
+SZ[19]
+PW[Tsuchiya Shuwa]
+PB[Yasuda Eisai]
+WR[7d]
+BR[1d]
+KM[0]
+DT[1840-05-23]
+RU[Japanese]
+HA[3]
+RE[W+1.00]PL[W]AB[dp][pd][pp]
+C[Shusaku Study Project contributors to katago-related enhancements to SGF:
+
+- frozensoul
+
+Shusaku Study Project contributors to PJ:
+
+- bugcat
+- D-E
+- Trevoke
+- FireScourge
+
+Contributors to DOP:
+
+- Itarios
+- Trevoke
+
+Contributors to Reading:
+
+- Trevoke]QKGV[464:0.674338:2.23747:17.7143::remote]JD[Tenpo 11-4-22]KTV[1.0]
+;W[dc]
+C[DOP
+-----
+D17 is looking at the left side to grow.
+-----]
+;B[ce]SQ[dp][pd][pp]
+C[PJ
+-----
+kakari and open directions to whole board.
+-----]
+;W[ch]
+C[PJ
+-----
+B stone is challenged.
+Left side is contested and made smaller.
+-----
+
+DOP
+-----
+C15 is forced to choose the corner or to go out to the center. 
+
+Since B has 3H (handicap), B moving to the center makes better use of those stones while not giving W the influence by going to the corner.
+-----]
+;B[dh]
+C[PJ
+-----
+D12 treats both C15 and D12 lightly.
+
+B attaches to make shape: either a good fight with a cross-cut, or nice light stones if W hane outsides.
+
+B is treating this as an even game.
+-----
+
+DOP
+-----
+W can try to keep B separated or can try to develop outside strength while pressuring the B stones
+-----]
+(;W[di]
+C[PJ
+-----
+Left side slightly bigger
+D17 slightly weakened
+D12 very weakened
+
+W is making two groups but keeping B base-less.
+-----
+
+
+Reading
+-----
+W doesn't play at D13 because B will cross-cut, and none of the results are very good for W
+-----]
+;B[cg]
+C[PJ
+-----
+Black continues to force for shape.
+Letting W play at C13 would give W shape and a base.
+-----]QKGV[45490:0.684011:2.38102:17.6136::remote]
+;W[ci]
+C[PJ
+-----
+W plays solid against B's thin shape.
+
+Left side strengthened
+-----
+
+DOP
+-----
+If B fixes his weakness on the D13 cut W has time to stabilize D17 while putting pressure on B.
+-----]QKGV[63018:0.677096:2.29766:17.6976::remote]
+;B[gc]TR[cd][de][dg][eh][fc][fd]LB[ci:1]
+C[Katago
+-----
+If you add a komi of 30, to cancel out the value of the 3-stone handicap, katago thinkgs tight pincer is correct and B's move at G17 is only marginally worse.
+-----
+
+PJ
+-----
+Group 1 is safe.
+
+B's shapes are thin.
+W is more solid, though B threatens to seal W D17 in.
+
+Triangle are local W forcing moves.
+
+B leaves a cut and an atari, but if W takes them it will allow B to strengthen an attack on the corner.
+-----
+
+DOP
+-----
+W needs to keep B split while getting D17 out.
+-----]QKGV[25083:0.651037:1.95524:17.4459::remote]
+;W[fd]
+C[Katago
+-----
+Assuming even game, F16 is the only move.
+-----
+
+PJ
+-----
+W leans on G17 in order to both split B and strengthen the corner group.
+-----]QKGV[38968:0.649569:1.92324:17.3978::remote]
+;B[gd];W[fe];B[cc]LB[ce:1][fe:2]
+C[PJ
+-----
+B challenges W's ability to make eye space in the corner.
+
+C17 secures group 1.
+
+Group 2 needs to move to live: it doesn't have eye space but it can use kikashi to become healthy
+-----
+
+DOP
+-----
+W needs to keep pressure on B while developing strength, so contesting the corner is the only direction.
+-----]
+;W[cb]
+C[PJ
+-----
+W must also contest the corner so that B's group doesn't become unreasonably strong this early in the game.
+-----]
+;B[dd];W[ec]
+C[PJ
+-----
+B's group is in danger of being sealed in, and living will be difficult.
+-----]
+;B[eh]TR[bc][bf][df][ge]LB[di:1][fd:3][gd:2]
+C[PJ
+-----
+W has several forceful counterattacks on B's group, but E12 allows B to run out.
+The turn at G15 is powerful against both of B's groups while also allowing W into the center.
+
+Group 1 is weakened.
+
+If group 2 gets to make a base or extension on the top, group 3 will be very uncomfortable.
+-----
+
+DOP
+-----
+While group 3 is not completely stable, it is stronger than group 2, so squeezing 2 in order to strengthen 3 is a good idea, especially because it gives W a stone on the top towards the corner.
+
+Extending group 1 is completely gote at the moment so it's uninteresting.
+-----]
+;W[jd]LB[cb:1][ce:2][gd:3]
+C[PJ
+-----
+Group 1 can live because of B17 forcing move, and can get to the center
+Group 2 has eye shape and is out to the center
+Group 3 remains light because the pincer is high: B can slide at K18
+
+Making a base with 3 is painful because W's follow-up on the outside is too good.
+-----
+
+DOP
+-----
+We're in a contest for power at the moment, not yet a fight, so B can't let W connect / turn at G15, and B must avoid getting sealed in, so a move towards the center makes sense
+-----
+
+
+Reading
+-----
+W doesn't play at K17 because otherwise B gets to split W into three groups, who all need to be managed.
+-----]
+;B[ie]LB[fe:1]
+C[PJ
+-----
+K16, while high, now may lose its easy path to the center
+Group 1 is in danger of being sealed in
+-----]
+;W[bc]LB[bc:1][ce:2][gd:3]
+C[PJ
+-----
+Group 1 is guaranteed to be alive now
+Group 2 has lost some eye space so it is weakened
+Group 3 is fairly light
+-----]
+;B[je]SQ[dp][eh][ie][je][pd][pp]
+C[PJ
+-----
+K16 cut off from center: needs a base or to run out somehow.
+
+B developing center power very intentionally.
+-----]
+;W[ld]
+C[PJ
+-----
+Potential for points on top left is almost destroyed - B can take points, but can't do so without sacrificing the effort for center control
+
+The one-space jump makes it hard for B to play in a coordinated fashion.
+-----]
+;B[jc]
+C[PJ
+-----
+This move reinforces B's position and W does not have good options. It forces W to stay thin. See game variation.
+-----]QKGV[4579:0.517481:0.140049:16.6541::remote]
+;W[kc];B[id]QKGV[582:0.998744:28.6052:18.2143::remote];W[jb];B[kd]SQ[dp][eh][ie][je][pd][pp]
+C[PJ
+-----
+B's plan is still safe and sound so far
+-----]
+;W[ke]
+C[PJ
+-----
+Standard resistance.
+-----]
+;B[kf];W[jd];B[ic]
+C[PJ
+-----
+Since ko threats aren't exactly abundant in the opening, B decides to make an eye.
+-----]QKGV[264:0.998650:27.5572:17.8274::remote]
+;W[nd]
+C[PJ
+-----
+W has played a bit lightly in order to create eyeshape along the side.
+
+While not completely alive, it is difficult for B to kill this group currently. B has forcing moves, but is not strong enough in the top right corner to kill W outright.
+
+B has a single eye with the J16 group, but is also out into the center, so it is not urgent yet for B to help this group, therefore B can easily tenuki.
+-----]
+;B[cl]LB[ci:1]
+C[PJ
+-----
+Group 1 can still live after *passing*.
+The resulting influence on the outside for B would be significant.
+
+The top right is the next area where strength/points balance can be meaningfully adjusted on the board, though.
+-----
+
+DOP
+-----
+Because C8 is not sente against group 1, W can tenuki and approach another corner. Poking at the top right corner gives the best options for organic development.
+-----]QKGV[39099:0.500966:-0.00982945:16.6834::remote]
+;W[pf]LB[ld:1]
+C[PJ
+-----
+W tenuki anyway, challenging the territory/strength value of the top right. If group 1 is able to build strength, B's center domination will be severely compromised.
+
+This double high approach is severe. B has few options to make good shape in the corner without allowing W to form a strong outside, and using brute force to get out will concede the corner to W with poor shape for B.
+-----
+
+DOP
+-----
+Make a fist before striking. B must make a base in order to possibly keep W split.
+-----]
+;B[qc]
+C[PJ
+-----
+B settles the corner group.
+-----]
+;W[qn]TR[dp][eh][kf][pp]SQ[pf][qn]MA[qg][qh][qi][qj][qk][ql][qm]LB[di:1]
+C[PJ
+-----
+W is dangling group 1, saying that the value of sealing in W won't be worth it because the center will be too contested.
+
+Right side is slowly becoming W potential
+-----]
+;B[bd]
+C[PJ
+-----
+Ko reinforces eye space for group 1, potentially challenges stability of group 2.
+One potential impact: sealing in group 2 might be able to happen with significant tempo now.
+
+If I count correctly:
+W wins the ko -> 3 points for W, nothing for B
+B wins the ko -> 0 points for W, 4 for B
+-----]
+;W[cd]QKGV[86488:0.503399:-0.0559851:16.705::remote];B[oe]
+C[Katago
+-----
+Katago would rather M15 first to continue developing center strength.
+-----
+
+PJ
+-----
+Pushing through the elephant jump seems like a dual attack, but W's M16 group is relatively strong and the Q14 stone is light. This push looks more severe than it is as it does not help B's corner much and follow-ups against Q14 are not very strong.
+
+This move primarily serves to manage W's group connections.
+-----]QKGV[378:0.998319:26.8986:17.9626::remote]
+;W[lf];B[kg];W[np]
+C[PJ
+-----
+White leaves the marked stone to its own devices. It's hard for Black to generate valuable play against it from his corner position.
+-----]
+;B[pn]
+C[This starts a joseki sequence.]
+;W[pm];B[on];W[qo]
+(;B[op];W[nq];B[qp]
+C[PJ
+-----
+This joseki with the O3, R4 exchange is a bit old fashioned. B has a harder time attacking the O3 side, but has an easier time potentially making an eye in the corner as well as a stronger cut at R7 later on.
+-----]
+;W[qj]TR[pr]SQ[pf]LB[pk:C][qk:B][ql:A]
+C[PJ
+-----
+R10 helps to solidify control of the right side of the board.
+It establishes a better connection to Q14 than A, B, or C would.
+
+
+W has Q2 to reduce B's base
+-----]
+;B[kd]LB[di:1]
+C[PJ
+-----
+Bottom is open
+
+Group 1 is last weak group that W has.
+-----]
+;W[dk]QKGV[62995:0.674937:1.99425:16.5028::remote];B[dl]
+C[DOP
+-----
+W's D11 group is weak, but will take many moves to capture, so W will treat it lightly in order to either sacrifice it efficiently, or live in the most efficient way possible. Starting by moving out to the center, rather than hunkering down to make eyes locally and getting sealed in.
+-----]QKGV[1065:0.998705:29.5066:18.0822::remote]
+;W[fk]
+C[PJ
+-----
+W's D11 group is weak, but will take many moves to capture, so W will treat it lightly in order to either sacrifice it efficiently, or live in the most efficient way possible. Starting by moving out to the center, rather than hunkering down to make eyes locally and getting sealed in.
+-----]
+;B[el]
+C[PJ
+-----
+In exchange for W saving his group, B gets nice influence over the bottom left.
+-----]
+;W[jd];B[fi]
+C[PJ
+-----
+Black plays from his weakest group, towards White's weakest.
+-----]
+;W[fj]
+C[PJ
+-----
+This table shape is not intended to make eyes, but easily connect the stones while keeping the options to run out more open. It is difficult for B to disconnect W's stones (see variations).
+-----]
+(;B[kd];W[fg];B[gi]QKGV[5367:0.998721:28.47:17.3063::remote];W[jd];B[kq]
+C[PJ
+-----
+Approaching the two stone W group puts pressure on it, while also staking out the bottom for territory.
+-----]
+;W[lo]CR[jp][mm]
+C[PJ
+-----
+The corner is stable.
+
+W keeps O4 group's escape path 
+
+W leans towards the L3 stone with the intention of creating a large scale attack on the Q4 corner group.
+
+Potential follow-ups marked with circles.
+-----
+
+DOP
+-----
+B wants to help L3, the weak stone, and develop the bottom at the same time. 
+-----]
+;B[ko]
+C[PJ
+-----
+The bottom left corner is very big and very open now.
+-----]
+;W[kp];B[jp];W[lp];B[jq];W[pr]
+C[PJ
+-----
+This relieves some of the pressure previously on W.
+-----]
+;B[qm]LB[np:1]
+C[PJ
+-----
+W has begun the attack so B exploits W's weakness immediately. From a fighting perspective, limiting the number of liberties of many groups is most useful.
+
+As B gains strength, a counterattack against group 1 will become more severe.
+-----]
+;W[rm];B[ql];W[rl];B[ol];W[pl];B[om];W[qk]LB[lo:2][on:1]
+C[PJ
+-----
+In exchange for giving W points, B was able to help group 1 run out.
+
+The pressure on group 2 is back.
+-----]
+;B[kn]LB[lq:A][rr:B]
+C[PJ
+-----
+Weakening White's group on the bottom side. However, White does still have moves like A and B, so he should be ok.
+-----]
+;W[mm]
+C[PJ
+-----
+W can live locally with M3, but allowing B the turn at M6 will give B too much strength and end any hope of an attack on the Q4 group.
+
+In the words of The Offspring, "You gotta keep 'em separated."
+
+Because B has forced W to settle the right side R6 group, W only needs to worry about the O4 group during this fight. Currently B's L5 group on the left looks strong, but as W runs out the defect at K5 may become a problem.
+-----]QKGV[84:0.998309:29.1764:19.1228::remote]
+;B[lm];W[ml]QKGV[93717:0.250482:-4.17835:18.1429::remote];B[mn]
+C[Katago
+-----
+Score: B+13.7
+Estimated point loss: 5.5
+PV: BO9 M6 R2 Q3 R3 L7 K7 L8
+Move was #1 according to policy  (37.84%).
+
+B should go to O9 (or R2 first, to close the corner) to keep W running.
+
+However, Shusaku (or maybe just kid Shusaku?) seems to not enjoy running fights.
+-----
+​]QKGV[41565:0.990629:18.0002:18.4527::remote]
+;W[ln];B[no]
+C[Katago
+-----
+Score: B+16
+Estimated point loss: 3.9
+
+Presumably Shusaku played this move to pressure W stones. If B connects at L7, W can atari at O6, and connect out his groups. Then B's corner is weak. That being said W is not alive yet so the fight will be ok for B when B escapes at O9
+-----]QKGV[38250:0.985336:17.9573:18.5842::remote]
+;W[mo]
+C[Katago
+-----
+Estimated point loss: 3.0
+PV: WL7 P3 O2 P2 M8 O1 N1 P1 C3 D3 C4 D5
+
+A mistake because it burns a W liberty. Better to cut at L7 and punish B, while keeping 3 liberties.
+-----]
+;B[nn];W[lq];B[km]TR[cq][gm][io]
+C[PJ
+-----
+The connection at L7 works to remove both defects in B's wall. The peep at J5 still exists, but is currently of nebulous value as it prompts B to fix without any real gain.
+
+Invasion / reduction points marked with triangles.
+-----]QKGV[1639:0.991015:16.643:17.0714::remote]
+;W[kr]CR[cq][fq][hq][hr][io][ir]
+C[PJ
+-----
+With L3, W gets follow-ups in B's biggest area.
+-----]QKGV[11056:0.995640:20.856:17.6737::remote]
+;B[nk]
+C[Katago
+-----
+Score: B+16
+Estimated point loss: 3.2
+
+O9 is natural, W can force at Q5 and remove B's eyespace, B needs to escape. This move is safe.
+
+Capturing with the ko at C17 first, would be a good tempo for B, offering a trade to W. 
+-----]QKGV[15893:0.994640:17.0888:16.2493::remote]
+;W[dg]
+(;B[df]
+C[Katago
+-----
+Estimated point loss: 6.3
+PV: BE13 D14 E14 D15 C17 E15 L16 C16 M15 M18 N16 N17 M17
+
+AI wants to trade left corner for topside. 
+This is B resisting the trade. Likely Shusaku thought it wasn't enough or was shaky. 
+-----]
+;W[eg];B[bf];W[bg];B[bh];W[cf];B[kd]
+C[Katago
+-----
+Estimated point loss: 3.6
+PV: BM2 N2 C13 A13 C17 H9 L16 M15 L18 M17 N12 C3 D3 C4 C2
+
+Too late. W is now leading a little, B trading now has lost too much in the corner compared to before. This was a clear error in judgment.
+-----]QKGV[20845:0.840837:4.43183:14.4336::remote]
+;W[cg]
+C[PJ
+-----
+Not only does W gain points directly by killing off B's stones in the upper left, but B's G11 stones are floating and W's F9 group is connected to safety, allowing W many more options in the lower left side.
+-----]
+;B[le]
+C[PJ
+-----
+While W was taking the time to finish off B in the top left, B was able to comeback and devastate W's shape on the top of the board.
+
+Making two eyes for W is now very difficult
+-----]
+;W[lc];B[jr];W[po]QKGV[42437:0.901012:5.98789:14.1212::remote];B[oo];W[cq]
+C[Katago
+-----
+Score: B+6.0
+-----
+
+PJ
+-----
+The 3-3 invasion acts as both corner invasion and reduction of B's moyo.
+-----]QKGV[67540:0.898482:5.85141:14.038::remote]
+;B[dq];W[cp]QKGV[89517:0.904814:6.06662:13.7655::remote];B[dr]
+C[PJ
+-----
+B plays solid, limiting W's forcing moves to reduce the bottom/center of the board.
+-----]
+;W[cn];B[en]
+C[Katago
+-----
+Estimated point loss: 3.3
+PV: BD5 B7 C9 F8 D6 C10 O18 P18 P17 O17 N18 Q18 M18 R18 L18 S17
+
+Normal shape. Pushing at D5 would be more "active" aiming at W weakness directly by pushing. This move is aiming for B5. But this allows W to fix at D5,C2. 
+-----
+
+ㅤ​]
+;W[do];B[eo];W[cr]QKGV[89175:0.591551:0.927712:12.9378::remote];B[nb]
+C[PJ
+-----
+A good push from B netting about 5 extra points
+-----]QKGV[6234:0.603519:1.05256:12.9724::remote]
+;W[ob];B[oc];W[nc];B[mb]QKGV[2250:0.001549:-29.5436:13.4243::remote];W[nf]
+C[PJ
+-----
+W has to allow the B peep here. It's the only way he'll be able to rescue his group.
+-----]
+;B[of];W[og];B[pe];W[ng];B[qf]
+C[PJ
+-----
+Atari to defend the corner and extend/reduce the side.
+-----]
+;W[lb];B[pb];W[ni]
+C[PJ
+-----
+The top side W group and right side W group are now almost connected.
+-----]
+;B[lg];W[mf]LB[ld:T][mf:B][nd:A][nf:L]
+C[PJ/Reading?
+-----
+Another table shape that is intended simply to connect out, not to make eyes locally.
+-----]
+;B[qr];W[or];B[pg];W[hk]
+C[PJ
+-----
+W is reducing B's territory potential in the center.
+-----]
+;B[me];W[ne];B[pi];W[oj]LB[ne:2][nn:1]
+C[PJ
+-----
+B believes they can not afford to cut with Q10, Q11 as the game would devolve into a complicated fight between group 1 and group 2.
+-----]
+;B[mk]LB[nf:1]
+C[PJ
+-----
+B opts to live simply in sente by capturing the N8 stones. W must still connect group 1 to the right side in order to live.
+-----]
+;W[ok]
+C[PJ
+-----
+W's top side group is now alive.
+-----]
+;B[ij];W[ik];B[jk];W[hj];B[hi]
+C[PJ
+-----
+The life and death of all groups is settled. We are in endgame.
+-----]
+;W[hn]
+C[PJ
+-----
+A further consequence of W's connection at C13. If W were still disconnected then they would be struggling to live here rather than playing purely reducing moves.
+-----]
+;B[ho];W[ds];B[es];W[cs];B[er];W[io];B[hp];W[lk];B[ll];W[qh]
+C[Katago
+-----
+Estimated point loss: 3.3
+PV: WS12 S13 R12 Q12 N12 M2 N2
+
+S12 is better, W gets R12 anyway, with S12 W has access to T13 hane. 
+-----
+ㅤ​]
+(;B[rg]
+C[Katago
+-----
+Estimated point loss: 3.8
+PV: BR11 S11 Q12 M10 S12 K10 J11 K8 J6
+
+A bit slack, B can R11 and resist. Since W will need to protect the wedge at O12 B will get sente for M2. 
+Perhaps an oversight on B's part?
+-----]
+;W[ph];B[rh];W[ri];B[bm];W[bn];B[si];W[rj];B[bj];W[bi];B[cj];W[dj];B[lr];W[mr];B[ks];W[rq]
+C[PJ
+-----
+Whichever way B blocks, W will always take territory from B.
+-----]
+;B[rp];W[rr];B[qq];W[qs];B[ps];W[rs];B[sq];W[ms];B[gn];W[jj];B[ii];W[jl];B[kk];W[lj];B[kl];W[li]
+;B[hm];W[im];B[in];W[fb];B[dn];W[cm];B[bl];W[ji];B[jh];W[hf]
+C[PJ
+-----
+Making good use of sente, W moves to minimize before B can get a stone down somewhere like H13.
+-----]
+;B[hg];W[gg];B[if];W[hh];B[ig];W[gh];B[ih];W[co];B[an];W[ao];B[am];W[aq];B[ro];W[rn];B[ib];W[gb]
+;B[ja];W[kb];B[mh];W[nh];B[qg];W[he];B[ge];W[gf];B[nj];W[mi];B[fl];W[kj];B[gl];W[il];B[jn];W[ck]
+;B[bk];W[os];B[sr];W[ls];B[kr];W[sj];B[sh];W[aj];B[ak];W[ai];B[lh];W[dm];B[em];W[fc];B[ma];W[sn])
+(;B[qi];W[ri];B[ph];W[mh];B[lr];W[mr]))
+(;B[eg];W[df];B[ef];W[de];B[cc];W[ee];B[kd];W[cd];B[le];W[lb];B[md];W[lc];B[mc]))
+(;B[ej];W[ek]
+(;B[ei];W[dj]
+C[Connected])
+(;B[dj];W[cj];B[ei];W[ck]
+C[Connected]))
+(;B[ek];W[ej];B[ck]
+C[Connected with miai])
+(;B[ei];W[dj]
+C[Connected by bamboo joint!]))
+(;B[qp]LB[np:A][on:B][pp:B][qn:A][qp:1]
+C[PJ/Reading?
+-----
+A common mistake among kyu players. The A stones lay at the vital point of the keima marked with B. This allows a severe cut that should have been protected as in the game line.
+-----]
+;W[po];B[oo];W[op];B[qm];W[rp];B[rq];W[ro]LB[ql:A][qq:B]
+C[PJ/Reading?
+-----
+W makes miai of A and B: whichever B defends, W will make profit by playing the other.
+-----]))
+(;W[dg];B[cg]
+C[The C15 stone is placed ideally to be very helpful here.]))

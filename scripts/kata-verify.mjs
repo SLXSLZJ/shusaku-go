@@ -1,0 +1,196 @@
+/**
+ * KataGo 浏览器引擎验证脚本（开发工具）。
+ * 启动无头 Edge（跨源隔离环境）→ 等引擎初始化 → 模拟落子 → 等 AI 应答 → 截图。
+ * Windows 会把部分端口列入排除段，因此依次尝试候选调试端口。
+ * 用法：node scripts/kata-verify.mjs [url]
+ */
+import { spawn } from 'node:child_process'
+import { writeFileSync } from 'node:fs'
+
+const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
+const URL = process.argv[2] ?? 'http://localhost:5173/'
+const SHOT = 'C:/Users/NewUser/AppData/Local/Temp/kata-verify.png'
+const DEBUG_LOG = 'C:/Users/NewUser/AppData/Local/Temp/kata-console.log'
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+function spawnEdgeOnPort(port) {
+  const proc = spawn(
+    EDGE,
+    [
+      '--remote-debugging-port=' + port,
+      '--headless=new',
+      '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-kata-verify-' + Date.now() + '-' + port,
+      '--disable-http-cache',
+      '--disable-features=BackForwardCache',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding',
+      '--disable-hang-monitor',
+      '--no-first-run',
+      '--window-size=1400,1000',
+      URL,
+    ],
+    { stdio: 'ignore' },
+  )
+  return proc
+}
+
+async function cdpReady(port) {
+  try {
+    const r = await fetch('http://127.0.0.1:' + port + '/json/version')
+    return r.ok
+  } catch {
+    return false
+  }
+}
+
+// 依次尝试候选端口：启动 Edge → 等 CDP → 就绪即选定
+let proc = null
+let port = null
+outer: for (const p of [9223, 9224, 9333, 9527, 9789]) {
+  proc = spawnEdgeOnPort(p)
+  for (let i = 0; i < 30; i++) {
+    if (await cdpReady(p)) {
+      port = p
+      break outer
+    }
+    await sleep(500)
+  }
+  try {
+    proc.kill()
+  } catch {}
+}
+if (!port) throw new Error('所有候选端口的 CDP 均未就绪')
+
+async function findTarget() {
+  for (let i = 0; i < 20; i++) {
+    const r = await fetch('http://127.0.0.1:' + port + '/json')
+    const list = await r.json()
+    const page = list.find((t) => t.type === 'page' && t.url.includes('localhost'))
+    if (page) return page
+    await sleep(500)
+  }
+  throw new Error('未找到调试目标')
+}
+
+const target = await findTarget()
+const ws = new WebSocket(target.webSocketDebuggerUrl)
+let seq = 0
+const pending = new Map()
+ws.onmessage = (ev) => {
+  const msg = JSON.parse(ev.data)
+  if (msg.id && pending.has(msg.id)) {
+    pending.get(msg.id)(msg)
+    pending.delete(msg.id)
+  }
+}
+await new Promise((r) => (ws.onopen = r))
+
+function send(method, params = {}) {
+  const id = ++seq
+  ws.send(JSON.stringify({ id, method, params }))
+  return new Promise((resolve, reject) => {
+    pending.set(id, (m) => (m.error ? reject(new Error(JSON.stringify(m.error))) : resolve(m.result)))
+  })
+}
+
+async function evalJs(expr) {
+  const r = await Promise.race([
+    send('Runtime.evaluate', { expression: expr, returnByValue: true }),
+    sleep(6000).then(() => null),
+  ])
+  if (r === null) return null
+  if (r.exceptionDetails) return '<<页面异常>>'
+  return r.result?.value
+}
+
+async function evalAwait(expr, timeoutMs = 8000) {
+  const r = await Promise.race([
+    send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true }),
+    sleep(timeoutMs).then(() => null),
+  ])
+  if (r === null) return null
+  if (r.exceptionDetails) return '<<页面异常>>'
+  return r.result?.value
+}
+
+await sleep(2000)
+
+// 等引擎就绪（App 挂载后暴露 window.__shusakuEngine）
+let engine = ''
+for (let i = 0; i < 90; i++) {
+  engine = (await evalJs('window.__shusakuEngine ?? ""')) ?? ''
+  if (engine) break
+  await sleep(1000)
+}
+console.log('引擎:', engine || '(未就绪)')
+
+// 黑方落子（棋盘中心）
+const dims = await evalJs(
+  '(() => { const c = document.querySelector(".board-canvas"); if (!c) return null; const r = c.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 } })()',
+)
+if (!dims) throw new Error('未找到棋盘画布')
+await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: dims.x, y: dims.y, button: 'left', clickCount: 1 })
+await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: dims.x, y: dims.y, button: 'left', clickCount: 1 })
+console.log('已落黑子于棋盘中心，等待 AI 应答……')
+
+// 等 AI 应答（手数 ≥ 2），最多 4 分钟
+let moves = 0
+let announceText = ''
+const t0 = Date.now()
+for (let i = 0; i < 480; i++) {
+  if (i > 0 && i % 40 === 0) console.log(`  …等待中 ${Math.round((Date.now() - t0) / 1000)}s，手数 ${moves}`)
+  const s = await evalJs(
+    '(() => ({ moves: document.querySelectorAll(".log li").length, announce: document.querySelector(".announce")?.textContent ?? "" }))()',
+  )
+  if (s === null) {
+    await sleep(500)
+    continue
+  }
+  moves = s.moves
+  announceText = s.announce
+  if (moves >= 2) break
+  await sleep(500)
+}
+console.log('手数:', moves, `（耗时 ${Math.round((Date.now() - t0) / 1000)}s）`)
+console.log('解说:', announceText || '(无)')
+
+const st = await evalJs(
+  '(() => ({ engine: window.__shusakuEngine ?? "", thinking: !!document.querySelector(".state-row")?.textContent.includes("思考"), winrate: document.querySelector(".wr-bar") ? "有" : "无" }))()',
+)
+console.log('状态:', JSON.stringify(st))
+if (moves >= 2) {
+  // 实证 IndexedDB 模型缓存已写入
+  const idb = await evalAwait(
+    `(async () => {
+      const db = await new Promise((res, rej) => {
+        const r = indexedDB.open('shusaku-models', 1)
+        r.onsuccess = () => res(r.result)
+        r.onerror = () => rej(r.error)
+      })
+      const keys = await new Promise((res, rej) => {
+        const tx = db.transaction('models', 'readonly')
+        const rq = tx.objectStore('models').getAllKeys()
+        rq.onsuccess = () => res(rq.result)
+        rq.onerror = () => rej(rq.error)
+      })
+      db.close()
+      return JSON.stringify(keys)
+    })()`,
+    8000,
+  )
+  console.log('IDB 模型缓存:', idb)
+}
+if (moves < 2) {
+  const diag = await evalJs(
+    '(() => ({ out: document.querySelector("#output")?.value?.slice(-800) ?? "", log: document.querySelector("#log")?.textContent?.slice(-800) ?? "" }))()',
+  )
+  console.log('诊断:', JSON.stringify(diag))
+}
+
+const shot = await send('Page.captureScreenshot', { format: 'png' })
+writeFileSync(SHOT, Buffer.from(shot.data, 'base64'))
+console.log('截图:', SHOT)
+
+proc.kill()
+process.exit(0)

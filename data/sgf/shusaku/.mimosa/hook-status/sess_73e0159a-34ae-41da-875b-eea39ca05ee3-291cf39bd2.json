@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "mimosa-hook-status/v1",
+  "recordedAt": "2026-09-09T12:17:33.111Z",
+  "sessionId": "sess_73e0159a-34ae-41da-875b-eea39ca05ee3",
+  "event": "PostToolUse",
+  "toolName": "Write",
+  "file": "C:\\Users\\NewUser\\shusaku-go\\scripts\\build-shusaku-book.mjs",
+  "outcome": "clear",
+  "coverage": "complete",
+  "findingCount": 0,
+  "durationMs": 3,
+  "hostState": "hook_complete",
+  "reportHint": ".mimosa/reports/"
+}
