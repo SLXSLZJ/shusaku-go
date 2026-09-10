@@ -92,53 +92,68 @@ interface AnalyzeOutcome {
   }>
 }
 
+/** 推理后端偏好：WebGPU 优先；对局中途故障则永久降级 WASM（本会话内） */
+let backendPref: 'webgpu' | 'wasm' = 'webgpu'
+
 async function analyzePosition(
   position: GamePosition,
   settings: EngineSettings,
   ownershipMode: 'none' | 'root' | 'tree',
 ): Promise<AnalyzeOutcome> {
-  const { boards, currentPlayer, kMoves } = replayBoards(position)
-  const humanSl = settings.humanSl
-  const analysis = await client.analyze({
-    analysisGroup: 'interactive',
-    positionId: `p${position.moves.length}`,
-    parentPositionId: position.moves.length > 0 ? `p${position.moves.length - 1}` : undefined,
-    modelUrl: KATAGO_MODEL_URL,
-    // WebGPU 优先（Edge/Chrome 新版可用，b18 明显提速）；引擎内置
-    // webgpu→wasm→cpu 回退链，不支持的浏览器自动降级
-    backend: 'webgpu',
-    board: boards[boards.length - 1]!,
-    previousBoard: boards.length >= 2 ? boards[boards.length - 2] : undefined,
-    previousPreviousBoard: boards.length >= 3 ? boards[boards.length - 3] : undefined,
-    currentPlayer,
-    moveHistory: kMoves,
-    komi: position.komi,
-    rules: toKRules(position.rules),
-    visits: settings.visits,
-    maxTimeMs: settings.maxTimeMs,
-    ownershipMode,
-    reuseTree: true,
-    humanModelUrl: humanSl ? KATAGO_HUMAN_MODEL_URL : undefined,
-    humanSlProfile: humanSl?.profile,
-    humanSlRootExploreProb: humanSl ? humanBotPresets[humanSl.style].rootExploreProbWeightless : undefined,
-  })
-  return {
-    blackWinrate: analysis.rootWinRate,
-    scoreLead: analysis.rootScoreLead,
-    ownership: Array.from(analysis.ownership),
-    visits: analysis.rootVisits,
-    size: position.size,
-    moveNumber: position.moves.length,
-    currentPlayer,
-    moves: analysis.moves.map((m) => ({
-      x: m.x,
-      y: m.y,
-      visits: m.visits,
-      order: m.order,
-      playSelectionValue: m.playSelectionValue,
-      humanPrior: m.humanPrior,
-      utility: m.utility,
-    })),
+  const attempt = async (): Promise<AnalyzeOutcome> => {
+    const { boards, currentPlayer, kMoves } = replayBoards(position)
+    const humanSl = settings.humanSl
+    const analysis = await client.analyze({
+      analysisGroup: 'interactive',
+      positionId: `p${position.moves.length}`,
+      parentPositionId: position.moves.length > 0 ? `p${position.moves.length - 1}` : undefined,
+      modelUrl: KATAGO_MODEL_URL,
+      backend: backendPref,
+      board: boards[boards.length - 1]!,
+      previousBoard: boards.length >= 2 ? boards[boards.length - 2] : undefined,
+      previousPreviousBoard: boards.length >= 3 ? boards[boards.length - 3] : undefined,
+      currentPlayer,
+      moveHistory: kMoves,
+      komi: position.komi,
+      rules: toKRules(position.rules),
+      visits: settings.visits,
+      maxTimeMs: settings.maxTimeMs,
+      ownershipMode,
+      reuseTree: true,
+      humanModelUrl: humanSl ? KATAGO_HUMAN_MODEL_URL : undefined,
+      humanSlProfile: humanSl?.profile,
+      humanSlRootExploreProb: humanSl ? humanBotPresets[humanSl.style].rootExploreProbWeightless : undefined,
+    })
+    return {
+      blackWinrate: analysis.rootWinRate,
+      scoreLead: analysis.rootScoreLead,
+      ownership: Array.from(analysis.ownership),
+      visits: analysis.rootVisits,
+      size: position.size,
+      moveNumber: position.moves.length,
+      currentPlayer,
+      moves: analysis.moves.map((m) => ({
+        x: m.x,
+        y: m.y,
+        visits: m.visits,
+        order: m.order,
+        playSelectionValue: m.playSelectionValue,
+        humanPrior: m.humanPrior,
+        utility: m.utility,
+      })),
+    }
+  }
+  try {
+    return await attempt()
+  } catch (err) {
+    if (backendPref === 'webgpu') {
+      // GPU 中途故障（如 createBuffer 分配失败）：降级 WASM 并重试本步。
+      // 模型走 IndexedDB 缓存，重新建图只需数秒。
+      backendPref = 'wasm'
+      console.warn('[katago] WebGPU 推理失败，已降级 WASM 并重试：', err)
+      return attempt()
+    }
+    throw err
   }
 }
 

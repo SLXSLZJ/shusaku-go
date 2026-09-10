@@ -75,11 +75,20 @@ export default function App() {
   const territoryReqRef = useRef(0)
 
   const aiPlayerNum: 0 | 1 | 2 = applied.aiSide === 'black' ? BLACK : applied.aiSide === 'white' ? WHITE : 0
+  const appliedRef = useRef(applied)
+  appliedRef.current = applied
   const humanTurn = !snap.isOver && !thinking && (applied.aiSide === 'none' || snap.turn !== aiPlayerNum)
 
   function getBackend(): Promise<EngineBackend> {
     if (!backendRef.current) {
-      backendRef.current = getEngineBackend((p) => setEngineProgress(p.stage === 'ready' ? null : p)).then((b) => {
+      backendRef.current = getEngineBackend((p) => {
+        if (p.stage === 'ready') {
+          // 秀策流下人味网仍要预热：横幅留给预热流程收尾，避免「闪一下就没」
+          setEngineProgress((cur) => (appliedRef.current.aiStyle === 'shusaku' ? cur : null))
+        } else {
+          setEngineProgress(p)
+        }
+      }).then((b) => {
         setEngineName(b.name)
         window.__shusakuEngine = b.name
         return b
