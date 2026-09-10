@@ -99,12 +99,13 @@ async function analyzePosition(
   position: GamePosition,
   settings: EngineSettings,
   ownershipMode: 'none' | 'root' | 'tree',
+  group: 'interactive' | 'background' = 'interactive',
 ): Promise<AnalyzeOutcome> {
   const attempt = async (): Promise<AnalyzeOutcome> => {
     const { boards, currentPlayer, kMoves } = replayBoards(position)
     const humanSl = settings.humanSl
     const analysis = await client.analyze({
-      analysisGroup: 'interactive',
+      analysisGroup: group,
       positionId: `p${position.moves.length}`,
       parentPositionId: position.moves.length > 0 ? `p${position.moves.length - 1}` : undefined,
       modelUrl: KATAGO_MODEL_URL,
@@ -272,7 +273,8 @@ export async function katagoGenMove(position: GamePosition, settings: EngineSett
 
 export async function katagoEvaluate(position: GamePosition, settings: EngineSettings): Promise<PositionResult> {
   const t0 = Date.now()
-  const outcome = await analyzePosition(position, settings, 'root')
+  // background 组：胜率探测 / 形势判断不得抢占（取消）AI 正在进行的行棋搜索
+  const outcome = await analyzePosition(position, settings, 'root', 'background')
   return {
     blackWinrate: Math.min(0.99, Math.max(0.01, outcome.blackWinrate)),
     scoreLead: outcome.scoreLead,
@@ -287,6 +289,7 @@ export async function katagoBenchmark(size: BoardSize, playouts: number): Promis
     { size, moves: [], handicapStones: 0, komi: 7.5, rules: 'chinese', superko: true },
     { visits: Math.max(16, playouts), maxTimeMs: 60_000, pickMode: 'best' },
     'none',
+    'background',
   )
   const seconds = Math.max(0.5, (Date.now() - t0) / 1000)
   return { playoutsPerSecond: Math.round(playouts / seconds), timeMs: Date.now() - t0 }

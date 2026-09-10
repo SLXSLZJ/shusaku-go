@@ -20,11 +20,22 @@ export interface GameConfig {
 export const DEFAULT_CONFIG: GameConfig = {
   size: 9,
   rules: 'chinese',
-  komi: 7.5,
+  komi: 6.5,
   handicap: 0,
   aiSide: 'white',
   strength: 5,
   aiStyle: 'shusaku',
+}
+
+/** 各棋盘尺寸的默认贴目：9/13 路沿用 7.5 会严重偏白（引擎实测黑胜率个位数） */
+const DEFAULT_KOMI: Record<BoardSize, Record<Rules, number>> = {
+  9: { chinese: 6.5, japanese: 6.5 },
+  13: { chinese: 6.5, japanese: 6.5 },
+  19: { chinese: 7.5, japanese: 6.5 },
+}
+
+function defaultKomiFor(size: BoardSize, rules: Rules): number {
+  return DEFAULT_KOMI[size][rules]
 }
 
 const SIZES: { value: BoardSize; label: string }[] = [
@@ -51,10 +62,13 @@ function btnCls(active: boolean): string {
 
 export function GameSetup({ config, disabled, open, onToggle, benchText, onChange, onStart, onBenchmark }: GameSetupProps) {
   const setRules = (rules: Rules): void =>
-    onChange({ rules, komi: config.handicap > 0 ? 0.5 : rules === 'chinese' ? 7.5 : 6.5 })
+    onChange({ rules, komi: config.handicap > 0 ? 0.5 : defaultKomiFor(config.size, rules) })
+
+  const setSize = (size: BoardSize): void =>
+    onChange({ size, komi: config.handicap > 0 ? 0.5 : defaultKomiFor(size, config.rules) })
 
   const setHandicap = (h: number): void =>
-    onChange({ handicap: h, komi: h > 0 ? 0.5 : config.rules === 'chinese' ? 7.5 : 6.5 })
+    onChange({ handicap: h, komi: h > 0 ? 0.5 : defaultKomiFor(config.size, config.rules) })
 
   return (
     <section className="panel setup-panel">
@@ -85,7 +99,7 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
                 type="button"
                 className={btnCls(config.size === s.value)}
                 disabled={disabled}
-                onClick={() => onChange({ size: s.value })}
+                onClick={() => setSize(s.value)}
               >
                 {s.label}
               </button>
