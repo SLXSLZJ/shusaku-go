@@ -66,7 +66,7 @@ async function findTarget() {
   for (let i = 0; i < 20; i++) {
     const r = await fetch('http://127.0.0.1:' + port + '/json')
     const list = await r.json()
-    const page = list.find((t) => t.type === 'page' && t.url.includes('localhost'))
+    const page = list.find((t) => t.type === 'page')
     if (page) return page
     await sleep(500)
   }
@@ -137,11 +137,12 @@ console.log('已落黑子于棋盘中心，等待 AI 应答……')
 // 等 AI 应答（手数 ≥ 2），最多 4 分钟
 let moves = 0
 let announceText = ''
+let bannerSeen = ''
 const t0 = Date.now()
 for (let i = 0; i < 480; i++) {
   if (i > 0 && i % 40 === 0) console.log(`  …等待中 ${Math.round((Date.now() - t0) / 1000)}s，手数 ${moves}`)
   const s = await evalJs(
-    '(() => ({ moves: document.querySelectorAll(".log li").length, announce: document.querySelector(".announce")?.textContent ?? "" }))()',
+    '(() => ({ moves: document.querySelectorAll(".log li").length, announce: document.querySelector(".announce")?.textContent ?? "", banner: document.querySelector(".engine-banner")?.textContent ?? "" }))()',
   )
   if (s === null) {
     await sleep(500)
@@ -149,6 +150,10 @@ for (let i = 0; i < 480; i++) {
   }
   moves = s.moves
   announceText = s.announce
+  if (!bannerSeen && s.banner) {
+    bannerSeen = s.banner
+    console.log('横幅出现:', s.banner.replace(/\s+/g, ' ').trim())
+  }
   if (moves >= 2) break
   await sleep(500)
 }

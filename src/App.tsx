@@ -4,7 +4,8 @@ import { GoGame } from './core/game'
 import { computeScore, deadStonesFromOwnership, type ScoreDetail } from './core/scoring'
 import { BLACK, WHITE, type BoardSize, type PlayError, type Point } from './core/types'
 import { describeLastMoveParts, type MoveAnnounce } from './engine/commentary'
-import { getEngineBackend, type EngineBackend } from './engine/engineFacade'
+import { getEngineBackend, type EngineBackend, type EngineProgress } from './engine/engineFacade'
+import { warmHumanModel } from './engine/katagoTsBackend'
 import type { GamePosition } from './engine/protocol'
 import { strengthLevel } from './engine/strength'
 import { COLUMN_LETTERS } from './render/boardRenderer'
@@ -65,6 +66,7 @@ export default function App() {
   const [resignSide, setResignSide] = useState<'black' | 'white' | null>(null)
   const [benchText, setBenchText] = useState<string | null>(null)
   const [engineName, setEngineName] = useState<string | null>(null)
+  const [engineProgress, setEngineProgress] = useState<EngineProgress | null>(null)
   const [setupOpen, setSetupOpen] = useState(true)
   const [announce, setAnnounce] = useState<MoveAnnounce | null>(null)
   const [announceKey, setAnnounceKey] = useState(0)
@@ -74,7 +76,7 @@ export default function App() {
 
   function getBackend(): Promise<EngineBackend> {
     if (!backendRef.current) {
-      backendRef.current = getEngineBackend().then((b) => {
+      backendRef.current = getEngineBackend((p) => setEngineProgress(p.stage === 'ready' ? null : p)).then((b) => {
         setEngineName(b.name)
         window.__shusakuEngine = b.name
         return b
@@ -128,7 +130,23 @@ export default function App() {
 
   // ── 页面打开即预热引擎（KataGo 初始化需要数秒，提前加载）──
   useEffect(() => {
+    let alive = true
     getBackend()
+      .then(async (b) => {
+        // 秀策流棋风下，人味网（94MB）同步预热，避免第一手棋才开始下载
+        if (b.name === 'KataGo' && applied.aiStyle === 'shusaku') {
+          await warmHumanModel((received, total) => {
+            if (alive) setEngineProgress({ stage: 'human', received, total })
+          })
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setEngineProgress(null)
+      })
+    return () => {
+      alive = false
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -452,6 +470,34 @@ export default function App() {
       </aside>
 
       <main className="board-area">
+        {engineProgress && engineProgress.stage !== 'ready' && (
+          <div className="engine-banner" role="status" aria-live="polite">
+            <span>
+              {engineProgress.stage === 'main'
+                ? 'AI 引擎准备中 · 下载棋力网络'
+                : '秀策棋风网络加载中'}
+              （页面不卡，可先看棋盘）
+            </span>
+            <div
+              className="engine-progress"
+              role="progressbar"
+              aria-label="引擎模型下载进度"
+            >
+              <div
+                style={{
+                  transform: `scaleX(${
+                    engineProgress.total > 0 ? engineProgress.received / engineProgress.total : 0
+                  })`,
+                }}
+              />
+            </div>
+            <span className="tiny dim">
+              {engineProgress.total > 0
+                ? `${Math.round(engineProgress.received / 1e6)} / ${Math.round(engineProgress.total / 1e6)} MB`
+                : '　'}
+            </span>
+          </div>
+        )}
         <div className="announce-slot">
           <AnimatePresence mode="wait">
             {announce && (

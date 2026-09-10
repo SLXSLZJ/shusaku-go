@@ -29,6 +29,9 @@ class KataGoEngineClient {
   private readonly worker: Worker;
   private nextId = 1;
   private pendingInit: { promise: Promise<void>; resolve: () => void; reject: (e: Error) => void } | null = null;
+  private initProgress: ((received: number, total: number) => void) | null = null;
+  private humanProgress: ((received: number, total: number) => void) | null = null;
+  private pendingWarm = new Map<number, { resolve: () => void; reject: (e: Error) => void }>();
   private pending = new Map<
     number,
     { resolve: (a: Analysis) => void; reject: (e: Error) => void; onProgress?: (a: Analysis) => void }
@@ -66,6 +69,19 @@ class KataGoEngineClient {
           if (msg.level === 'warn') console.warn(`[katago] ${msg.message}`);
           else console.info(`[katago] ${msg.message}`);
         }
+        return;
+      }
+      if (msg.type === 'katago:progress') {
+        if (msg.stage === 'main') this.initProgress?.(msg.received, msg.total);
+        else this.humanProgress?.(msg.received, msg.total);
+        return;
+      }
+      if (msg.type === 'katago:warm_human_result') {
+        const pendingWarm = this.pendingWarm.get(msg.id);
+        if (!pendingWarm) return;
+        this.pendingWarm.delete(msg.id);
+        if (!msg.ok) pendingWarm.reject(new Error(msg.error ?? 'Human model warm failed'));
+        else pendingWarm.resolve();
         return;
       }
       if (msg.type === 'katago:init_result') {
@@ -149,12 +165,15 @@ class KataGoEngineClient {
       this.pendingInit = null;
       reject(error);
     }
+    const pendingWarm = [...this.pendingWarm.values()];
+    this.pendingWarm.clear();
     const pendingAnalyze = [...this.pending.values()];
     this.pending.clear();
     const pendingEval = [...this.pendingEval.values()];
     this.pendingEval.clear();
     const pendingEvalBatch = [...this.pendingEvalBatch.values()];
     this.pendingEvalBatch.clear();
+    for (const entry of pendingWarm) entry.reject(error);
     for (const entry of pendingAnalyze) entry.reject(error);
     for (const entry of pendingEval) entry.reject(error);
     for (const entry of pendingEvalBatch) entry.reject(error);
@@ -213,9 +232,14 @@ class KataGoEngineClient {
     return { backend: this.backend, modelName: this.modelName, backendNote: this.backendNote };
   }
 
-  init(modelUrl: string, backend?: KataGoBackendPreference): Promise<void> {
+  init(
+    modelUrl: string,
+    backend?: KataGoBackendPreference,
+    onProgress?: (received: number, total: number) => void,
+  ): Promise<void> {
     if (this.pendingInit) return this.pendingInit.promise;
     if (this.crashed) return Promise.reject(this.crashed);
+    this.initProgress = onProgress ?? null;
     let resolve!: () => void;
     let reject!: (e: Error) => void;
     const promise = new Promise<void>((res, rej) => {
@@ -229,6 +253,29 @@ class KataGoEngineClient {
     } catch (err) {
       this.pendingInit = null;
       reject(err instanceof Error ? err : new Error(String(err)));
+    }
+    return promise;
+  }
+
+  /**
+   * 后台预热人味 SL 网（不阻塞主网就绪）：下载 + 解析 + 建图，
+   * 让「秀策流」的第一手棋不必再等 94MB 的下载。
+   */
+  warmHuman(
+    modelUrl: string,
+    onProgress?: (received: number, total: number) => void,
+  ): Promise<void> {
+    this.rejectIfCrashed();
+    this.humanProgress = onProgress ?? null;
+    const id = this.nextId++;
+    const promise = new Promise<void>((resolve, reject) => {
+      this.pendingWarm.set(id, { resolve, reject });
+    });
+    try {
+      this.postToWorker({ type: 'katago:warm_human', id, modelUrl });
+    } catch (err) {
+      this.pendingWarm.delete(id);
+      throw err;
     }
     return promise;
   }

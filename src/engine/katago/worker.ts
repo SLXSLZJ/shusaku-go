@@ -273,14 +273,18 @@ async function switchToFallbackBackendForRequest(
   }
 }
 
-async function ensureModel(modelUrl: string, backend?: KataGoBackendPreference): Promise<void> {
+async function ensureModel(
+  modelUrl: string,
+  backend?: KataGoBackendPreference,
+  onDownloadProgress?: (received: number, total: number) => void,
+): Promise<void> {
   const requestedBackend = normalizeKataGoBackendPreference(backend);
   if (!backendPromise || backendPreference !== requestedBackend) backendNote = null;
   await ensureBackend(requestedBackend);
   if (model && loadedModelUrl === modelUrl) return;
 
   // IndexedDB 缓存优先：免去重复下载上百 MB 的模型
-  const buf = await fetchModelWithCache(modelUrl);
+  const buf = await fetchModelWithCache(modelUrl, onDownloadProgress);
   if (looksLikeMarkup(buf)) throw modelResponseError(modelUrl);
   const data = maybeUngzip(buf);
 
@@ -318,10 +322,13 @@ async function ensureModel(modelUrl: string, backend?: KataGoBackendPreference):
  * human of a given rank would move. It is kept separate from the main model: the
  * analysis itself always comes from the strong net.
  */
-async function ensureHumanModel(modelUrl: string): Promise<KataGoModelV8Tf> {
+async function ensureHumanModel(
+  modelUrl: string,
+  onDownloadProgress?: (received: number, total: number) => void,
+): Promise<KataGoModelV8Tf> {
   if (humanModel && loadedHumanModelUrl === modelUrl) return humanModel;
 
-  const buf = await fetchModelWithCache(modelUrl);
+  const buf = await fetchModelWithCache(modelUrl, onDownloadProgress);
   if (looksLikeMarkup(buf)) throw modelResponseError(modelUrl);
   const parsed = parseKataGoModelV8(maybeUngzip(buf));
   if (parsed.metaEncoderVersion !== 1) {
@@ -443,13 +450,32 @@ function post(msg: KataGoWorkerResponse, transfer?: Transferable[]) {
 
 async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
   if (msg.type === 'katago:init') {
-    await ensureModel(msg.modelUrl, msg.backend);
+    await ensureModel(msg.modelUrl, msg.backend, (received, total) =>
+      post({ type: 'katago:progress', stage: 'main', received, total }),
+    );
     post({
       type: 'katago:init_result',
       ok: true,
       backend: tf.getBackend(),
       modelName: loadedModelName,
     });
+    return;
+  }
+
+  if (msg.type === 'katago:warm_human') {
+    try {
+      await ensureHumanModel(msg.modelUrl, (received, total) =>
+        post({ type: 'katago:progress', stage: 'human', received, total }),
+      );
+      post({ type: 'katago:warm_human_result', id: msg.id, ok: true });
+    } catch (err) {
+      post({
+        type: 'katago:warm_human_result',
+        id: msg.id,
+        ok: false,
+        error: describeError(err),
+      });
+    }
     return;
   }
 
@@ -992,6 +1018,15 @@ self.onmessage = (ev: MessageEvent<KataGoWorkerRequest>) => {
       if (msg.type === 'katago:init') {
         post({
           type: 'katago:init_result',
+          ok: false,
+          error: err instanceof Error ? err.message : String(err),
+        });
+        return;
+      }
+      if (msg.type === 'katago:warm_human') {
+        post({
+          type: 'katago:warm_human_result',
+          id: msg.id,
           ok: false,
           error: err instanceof Error ? err.message : String(err),
         });

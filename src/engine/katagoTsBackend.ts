@@ -192,9 +192,12 @@ function pickHumanStyleMove(outcome: AnalyzeOutcome, style: 'imitate' | 'search'
   return chosen.x < 0 || chosen.y < 0 ? { kind: 'pass' } : { kind: 'place', x: chosen.x, y: chosen.y }
 }
 
-export async function isKatagoTsReady(timeoutMs: number): Promise<boolean> {
+export async function isKatagoTsReady(
+  timeoutMs: number,
+  onProgress?: (received: number, total: number) => void,
+): Promise<boolean> {
   try {
-    const init = client.init(KATAGO_MODEL_URL, 'webgpu')
+    const init = client.init(KATAGO_MODEL_URL, 'webgpu', onProgress)
     let timer: ReturnType<typeof setTimeout> | null = null
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new Error('KataGo 初始化超时')), timeoutMs)
@@ -208,6 +211,16 @@ export async function isKatagoTsReady(timeoutMs: number): Promise<boolean> {
   } catch {
     return false
   }
+}
+
+/** 后台预热人味 SL 网（秀策流棋风专用）：主网就绪后调用，不阻塞对弈。 */
+export function warmHumanModel(
+  onProgress?: (received: number, total: number) => void,
+): Promise<boolean> {
+  return client
+    .warmHuman(KATAGO_HUMAN_MODEL_URL, onProgress)
+    .then(() => true)
+    .catch(() => false)
 }
 
 export async function katagoGenMove(position: GamePosition, settings: EngineSettings): Promise<GenMoveResult> {

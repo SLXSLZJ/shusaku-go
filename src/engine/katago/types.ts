@@ -6,6 +6,28 @@ export interface KataGoInitRequest {
   backend?: KataGoBackendPreference;
 }
 
+/** 主网 / 人味网模型下载进度（无 id 的广播消息）。 */
+export interface KataGoProgress {
+  type: 'katago:progress';
+  stage: 'main' | 'human';
+  received: number;
+  total: number;
+}
+
+/** 预热人味 SL 网：主网就绪后由主线程发起，避免第一手棋才开始下载。 */
+export interface KataGoWarmHumanRequest {
+  type: 'katago:warm_human';
+  id: number;
+  modelUrl: string;
+}
+
+export interface KataGoWarmHumanResponse {
+  type: 'katago:warm_human_result';
+  id: number;
+  ok: boolean;
+  error?: string;
+}
+
 export interface KataGoInitResponse {
   type: 'katago:init_result';
   ok: boolean;
@@ -209,7 +231,12 @@ export interface KataGoEvalBatchResponse {
   error?: string;
 }
 
-export type KataGoWorkerRequest = KataGoInitRequest | KataGoAnalyzeRequest | KataGoEvalRequest | KataGoEvalBatchRequest;
+export type KataGoWorkerRequest =
+  | KataGoInitRequest
+  | KataGoWarmHumanRequest
+  | KataGoAnalyzeRequest
+  | KataGoEvalRequest
+  | KataGoEvalBatchRequest;
 /** A one-off diagnostic from the worker, such as why a backend fell back. */
 export interface KataGoNotice {
   type: 'katago:notice';
@@ -219,6 +246,8 @@ export interface KataGoNotice {
 
 export type KataGoWorkerResponse =
   | KataGoNotice
+  | KataGoProgress
+  | KataGoWarmHumanResponse
   | KataGoInitResponse
   | KataGoAnalyzeUpdate
   | KataGoAnalyzeResponse

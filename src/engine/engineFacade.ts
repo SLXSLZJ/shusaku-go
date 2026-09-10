@@ -16,12 +16,17 @@ export interface EngineBackend {
   benchmark(size: BoardSize, playouts: number): Promise<BenchmarkResult>
 }
 
+/** 引擎准备进度：main = 主力网络下载；human = 秀策棋风网络预热；ready = 就绪 */
+export type EngineProgress =
+  | { stage: 'main' | 'human'; received: number; total: number }
+  | { stage: 'ready' }
+
 let singleton: Promise<EngineBackend> | null = null
 
 /**
  * 引擎选择：
- * - 首选 KataGo（web-katrain 移植版）：TFJS 网络推理 + PUCT 搜索运行在独立
- *   Worker，直接加载 KataGo 原生 .bin.gz 模型（public/models/kata1-b18c384nbt，
+ * - 首选 KataGo（web-katrain 移植版）：TFJS 网络推理 + PUCT 搜索运行在
+ *   独立 Worker，直接加载 KataGo 原生 .bin.gz 模型（public/models/kata1-b18c384nbt，
  *   19 路全棋盘），思考期间页面保持流畅。
  * - 模型加载失败 / 超时时回退内置 UCT Worker。
  *
@@ -30,13 +35,14 @@ let singleton: Promise<EngineBackend> | null = null
  */
 const KATAGO_ENABLED = true
 
-export function getEngineBackend(): Promise<EngineBackend> {
+export function getEngineBackend(onProgress?: (p: EngineProgress) => void): Promise<EngineBackend> {
   if (!singleton) {
     singleton = (async () => {
       if (KATAGO_ENABLED) {
         try {
           // 首次加载需取回约 190MB 模型并建图；慢网络放宽门控，失败仍回退 UCT
-          if (await isKatagoTsReady(240_000)) {
+          if (await isKatagoTsReady(240_000, (received, total) => onProgress?.({ stage: 'main', received, total }))) {
+            onProgress?.({ stage: 'ready' })
             return {
               name: KATAGO_MODEL_NAME,
               genMove: katagoGenMove,
