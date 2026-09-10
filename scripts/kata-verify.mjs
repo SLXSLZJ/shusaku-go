@@ -164,6 +164,20 @@ const st = await evalJs(
   '(() => ({ engine: window.__shusakuEngine ?? "", thinking: !!document.querySelector(".state-row")?.textContent.includes("思考"), winrate: document.querySelector(".wr-bar") ? "有" : "无" }))()',
 )
 console.log('状态:', JSON.stringify(st))
+
+// 形势判断：点开开关，等评估完成后截图核验势力方块
+const tb = await evalJs(
+  '(() => { const b = document.querySelector(".board-toolbar .btn"); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 } })()',
+)
+if (tb && tb.x) {
+  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: tb.x, y: tb.y, button: 'left', clickCount: 1 })
+  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: tb.x, y: tb.y, button: 'left', clickCount: 1 })
+  await sleep(4000)
+  const tbState = await evalJs(
+    'document.querySelector(".board-toolbar .btn")?.className ?? ""',
+  )
+  console.log('形势判断按钮:', tbState)
+}
 if (moves >= 2) {
   // 实证 IndexedDB 模型缓存已写入
   const idb = await evalAwait(

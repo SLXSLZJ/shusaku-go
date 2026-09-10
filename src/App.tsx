@@ -70,6 +70,9 @@ export default function App() {
   const [setupOpen, setSetupOpen] = useState(true)
   const [announce, setAnnounce] = useState<MoveAnnounce | null>(null)
   const [announceKey, setAnnounceKey] = useState(0)
+  const [territoryOn, setTerritoryOn] = useState(false)
+  const [territory, setTerritory] = useState<number[] | null>(null)
+  const territoryReqRef = useRef(0)
 
   const aiPlayerNum: 0 | 1 | 2 = applied.aiSide === 'black' ? BLACK : applied.aiSide === 'white' ? WHITE : 0
   const humanTurn = !snap.isOver && !thinking && (applied.aiSide === 'none' || snap.turn !== aiPlayerNum)
@@ -237,6 +240,26 @@ export default function App() {
       .catch((e) => setStatus({ kind: 'error', text: `数子失败：${String(e)}` }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snap])
+
+  // ── 形势判断：开启时用小型评估取势力图，随每手刷新 ──
+  useEffect(() => {
+    if (!territoryOn || snap.isOver || thinking || scoring) {
+      if (!territoryOn) setTerritory(null)
+      return
+    }
+    const req = ++territoryReqRef.current
+    let alive = true
+    getBackend()
+      .then((b) => b.evaluate(positionFromGame(), { visits: 96, maxTimeMs: 3000, pickMode: 'best' }))
+      .then((res) => {
+        if (alive && req === territoryReqRef.current) setTerritory(res.ownership)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [territoryOn, snap, thinking, scoring])
 
   const handlePlay = (x: number, y: number): void => {
     if (scoring) {
@@ -529,8 +552,19 @@ export default function App() {
           turn={snap.turn}
           interactive={!snap.isOver && (!!scoring || humanTurn)}
           deadKeys={deadKeys}
+          territory={territoryOn ? territory : null}
           onPlay={handlePlay}
         />
+        <div className="board-toolbar">
+          <button
+            type="button"
+            className={territoryOn ? 'btn btn-sm active' : 'btn btn-sm'}
+            disabled={!!scoring}
+            onClick={() => setTerritoryOn((v) => !v)}
+          >
+            形势判断
+          </button>
+        </div>
       </main>
     </div>
   )

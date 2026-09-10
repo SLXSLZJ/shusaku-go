@@ -359,10 +359,19 @@ body {
   justify-content: center;
   gap: 14px;
   padding: 20px;
+  /* 底部留白：给 Netlify「powered by」徽标让位，避免盖住棋盘右下角 */
+  padding-bottom: 58px;
   min-width: 0;
   min-height: 0;
   position: relative;
   container-type: size;
+}
+
+.board-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
 }
 
 .announce-slot {

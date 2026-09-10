@@ -56,6 +56,8 @@ export interface DrawParams {
   hover: { x: number; y: number; stone: Stone } | null
   /** 判死棋子（"x,y"），半透明绘制 */
   deadKeys?: Set<string>
+  /** 形势判断：ownership（长度 size²，行主序，+黑 -白）；空点画势力小方块 */
+  territory?: number[] | null
   /** 落子涟漪强度 0..1（1 = 刚落子），用于最后一手的光圈动画 */
   pulse?: number
   cssSize: number
@@ -168,6 +170,31 @@ export function drawBoard(p: DrawParams): void {
       if (s === 0) continue
       const dead = p.deadKeys?.has(`${x},${y}`) ?? false
       drawStone(x, y, s as Stone, dead ? 0.35 : 1)
+    }
+  }
+
+  // 形势判断视野：空点上的势力小方块（黑实心 / 白空心加边），参考传统「形势图」画法
+  if (p.territory && p.territory.length >= boardSize * boardSize) {
+    const side = cell * 0.26
+    for (let y = 0; y < boardSize; y++) {
+      for (let x = 0; x < boardSize; x++) {
+        if (stones[y * boardSize + x] !== 0) continue
+        const own = p.territory[y * boardSize + x] ?? 0
+        if (own > 0.2 || own < -0.2) {
+          const cx = gx(x)
+          const cy = gy(y)
+          if (own > 0) {
+            ctx.fillStyle = 'rgba(18, 16, 14, 0.92)'
+            ctx.fillRect(cx - side / 2, cy - side / 2, side, side)
+          } else {
+            ctx.fillStyle = 'rgba(255, 255, 253, 0.95)'
+            ctx.fillRect(cx - side / 2, cy - side / 2, side, side)
+            ctx.strokeStyle = 'rgba(60, 50, 40, 0.7)'
+            ctx.lineWidth = Math.max(1, cell * 0.035)
+            ctx.strokeRect(cx - side / 2, cy - side / 2, side, side)
+          }
+        }
+      }
     }
   }
 

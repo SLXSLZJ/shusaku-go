@@ -10,6 +10,8 @@ interface BoardCanvasProps {
   interactive: boolean
   /** 终局数子时判死的棋子（"x,y" 集合），半透明显示 */
   deadKeys?: Set<string>
+  /** 形势判断：ownership 势力图（+黑 -白），非空时在空点画势力小方块 */
+  territory?: number[] | null
   onPlay: (x: number, y: number) => void
 }
 
@@ -18,7 +20,7 @@ interface HoverPoint {
   y: number
 }
 
-export function BoardCanvas({ boardSize, stones, lastMove, turn, interactive, deadKeys, onPlay }: BoardCanvasProps) {
+export function BoardCanvas({ boardSize, stones, lastMove, turn, interactive, deadKeys, territory, onPlay }: BoardCanvasProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [cssSize, setCssSize] = useState(0)
@@ -67,12 +69,13 @@ export function BoardCanvas({ boardSize, stones, lastMove, turn, interactive, de
       lastMove,
       hover: interactive && !deadKeys && hover ? { x: hover.x, y: hover.y, stone: turn } : null,
       deadKeys,
+      territory,
       pulse,
       cssSize,
       dpr,
       withCoordinates: true,
     })
-  }, [boardSize, stones, lastMove, hover, cssSize, turn, interactive, deadKeys, pulse])
+  }, [boardSize, stones, lastMove, hover, cssSize, turn, interactive, deadKeys, territory, pulse])
 
   const pointFromEvent = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>): HoverPoint | null => {
