@@ -346,6 +346,21 @@ body {
   gap: 6px;
 }
 
+.music-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.music-controls .music-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.music-cancel {
+  flex: none;
+}
+
 .music-select {
   font: inherit;
   font-size: 12.5px;

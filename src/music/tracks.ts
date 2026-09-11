@@ -20,7 +20,6 @@ export const TRACKS: Track[] = [
   { id: 'get-over', title: 'Get Over - Dream', file: 'get-over.m4a', role: 'menu' },
   { id: 'ill-be-the-one', title: "I'll be the one - HΛL", file: 'ill-be-the-one.m4a', role: 'menu' },
   { id: 'bokura-kids', title: 'ボクらの冒険 - Kids Alive', file: 'bokura-kids.m4a', role: 'menu' },
-  { id: 'bokura-hyh', title: 'ボクらの冒険 - HYH', file: 'bokura-hyh.mp3', role: 'menu' },
 ]
 
 export function trackById(id: string): Track | undefined {

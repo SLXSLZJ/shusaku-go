@@ -144,17 +144,23 @@ async function analyzePosition(
       })),
     }
   }
-  try {
-    return await attempt()
-  } catch (err) {
-    if (backendPref === 'webgpu') {
-      // GPU 中途故障（如 createBuffer 分配失败）：降级 WASM 并重试本步。
-      // 模型走 IndexedDB 缓存，重新建图只需数秒。
-      backendPref = 'wasm'
-      console.warn('[katago] WebGPU 推理失败，已降级 WASM 并重试：', err)
-      return attempt()
+  const settle = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+  // WebGPU 对局中途故障（设备重置/缓冲区失败）→ 永久降级 WASM；
+  // WASM 偶发失败也给予有限重试，总共最多 3 次尝试
+  for (let attemptNo = 1; ; attemptNo++) {
+    try {
+      return await attempt()
+    } catch (err) {
+      if (backendPref === 'webgpu') {
+        backendPref = 'wasm'
+        console.warn('[katago] WebGPU 推理失败，已降级 WASM 并重试：', err)
+        await settle(300)
+        continue
+      }
+      if (attemptNo >= 3) throw err
+      console.warn(`[katago] 推理失败（第 ${attemptNo} 次），重试：`, err)
+      await settle(300)
     }
-    throw err
   }
 }
 

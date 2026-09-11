@@ -118,32 +118,44 @@ export function MusicWidget({ started, serious, winrate }: MusicWidgetProps) {
           <span className="vinyl-hole" aria-hidden />
         </button>
         <div className="music-meta">
-          <select
-            className="music-select"
-            value={selectedId ?? (mode === 'off' ? 'off' : 'auto')}
-            onChange={(e) => {
-              const v = e.target.value
-              if (v === 'off') {
-                setMode('off')
-                setSelectedId(null)
-                musicPlayer.apply(null)
-              } else if (v === 'auto') {
-                setSelectedId(null)
-                setMode('auto')
-              } else {
-                setSelectedId(v)
-                setMode('auto')
-              }
-            }}
-          >
-            <option value="off">关闭音乐</option>
-            <option value="auto">默认 · 随局势切换</option>
-            {TRACKS.map((t) => (
-              <option key={t.id} value={t.id}>
-                单曲循环 · {t.title}
-              </option>
-            ))}
-          </select>
+          <div className="music-controls">
+            <select
+              className="music-select"
+              value={selectedId ?? (mode === 'off' ? 'off' : 'auto')}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === 'off') {
+                  setMode('off')
+                  setSelectedId(null)
+                  musicPlayer.apply(null)
+                } else if (v === 'auto') {
+                  setSelectedId(null)
+                  setMode('auto')
+                } else {
+                  setSelectedId(v)
+                  setMode('auto')
+                }
+              }}
+            >
+              <option value="off">关闭音乐</option>
+              <option value="auto">默认 · 随局势切换</option>
+              {TRACKS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  单曲循环 · {t.title}
+                </option>
+              ))}
+            </select>
+            {selectedId !== null && (
+              <button
+                type="button"
+                className="btn btn-sm music-cancel"
+                title="取消单曲选择，切回默认随局势切换"
+                onClick={() => setSelectedId(null)}
+              >
+                取消
+              </button>
+            )}
+          </div>
           <div className="music-now tiny dim">{playing ? `♪ ${currentTitle || modeLabel}` : modeLabel}</div>
         </div>
       </div>
