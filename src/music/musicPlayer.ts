@@ -6,6 +6,8 @@
  * widget 的任意一次点击调用，解锁前 apply 只暂存期望。
  */
 
+import { trackById, trackUrl } from './tracks'
+
 export interface DesiredTrack {
   id: string
   loop: boolean
@@ -29,6 +31,9 @@ class MusicPlayer {
     const make = (): HTMLAudioElement => {
       const el = new Audio()
       el.preload = 'auto'
+      // 挂入 DOM（隐藏）：部分浏览器对离屏音频行为更稳，也便于调试探针
+      el.style.display = 'none'
+      document.body.appendChild(el)
       return el
     }
     this.els = [make(), make()]
@@ -105,8 +110,10 @@ class MusicPlayer {
   }
 
   private loadInto(el: HTMLAudioElement, d: DesiredTrack): void {
-    const track = d.id
-    el.src = `/music/${track}`
+    // id → 曲目文件（public/music/ 下的真实文件名）
+    const track = trackById(d.id)
+    if (!track) return
+    el.src = trackUrl(track)
     el.loop = d.loop
   }
 
@@ -152,7 +159,8 @@ class MusicPlayer {
         if (k >= 1 && cur !== next && to <= 0) {
           cur.pause()
           cur.removeAttribute('src')
-          cur.src = ''
+          // 重置而非置空 src：置空会让浏览器把当前页面当媒体加载，报无害但刺眼的错误
+          cur.load()
         }
       }
       if (k >= 1) {

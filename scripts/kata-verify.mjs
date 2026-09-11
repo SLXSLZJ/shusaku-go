@@ -164,6 +164,13 @@ const st = await evalJs(
   '(() => ({ engine: window.__shusakuEngine ?? "", thinking: !!document.querySelector(".state-row")?.textContent.includes("思考"), winrate: document.querySelector(".wr-bar") ? "有" : "无" }))()',
 )
 console.log('状态:', JSON.stringify(st))
+if (moves >= 2) {
+  // 音乐播放器探针：src 应为完整文件名（.m4a），无错误码，音量 0.8
+  const audio = await evalJs(
+    '(() => [...document.querySelectorAll("audio")].map(a => ({ src: (a.src || "").split("/").pop(), err: a.error ? a.error.code : 0, paused: a.paused, vol: Number(a.volume.toFixed(2)), network: a.networkState })) )()',
+  )
+  console.log('音频探针:', JSON.stringify(audio))
+}
 
 // 形势判断：点开开关，等评估完成后截图核验势力方块
 const tb = await evalJs(
