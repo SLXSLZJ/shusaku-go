@@ -57,7 +57,7 @@ export function BoardCanvas({ boardSize, stones, lastMove, turn, interactive, de
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || cssSize <= 0) return
-    const dpr = Math.min(window.devicePixelRatio || 1, 2.5)
+    const dpr = Math.min(window.devicePixelRatio || 1, window.matchMedia('(pointer: coarse)').matches ? 2 : 2.5)
     canvas.width = Math.round(cssSize * dpr)
     canvas.height = Math.round(cssSize * dpr)
     const ctx = canvas.getContext('2d')

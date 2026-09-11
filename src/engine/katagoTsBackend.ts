@@ -22,7 +22,7 @@ import {
   interpolateEarly,
   type HumanChosenCandidate,
 } from './katago/chosenMove'
-import { bookCandidates, sgfCoordToXY, weightedBookCandidate } from './shusakuBook'
+import { bookCandidates, ensureShusakuBook, sgfCoordToXY, weightedBookCandidate } from './shusakuBook'
 
 /** 主力网络：KataGo 官方 b18c384nbt 人味 SL 网（19 路全棋盘，CC BY-NC 4.0）。 */
 export const KATAGO_MODEL_URL = publicUrl('models/kata1-b18c384nbt-s9996604416-d4316597426.bin.gz')
@@ -248,6 +248,7 @@ export async function katagoGenMove(position: GamePosition, settings: EngineSett
   // 秀策流专属：开局路径命中棋谱库时，按秀策本人在该局面的实际着法加权选点。
   // 仍照常执行搜索，胜率/目差显示不受影响。
   if (settings.humanSl) {
+    await ensureShusakuBook()
     const board = replayBoards(position).boards.at(-1)
     const candidates = bookCandidates(position.moves.map((m) => ({ x: m.x, y: m.y })))
     if (board && candidates) {

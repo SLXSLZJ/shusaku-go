@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { bookCandidates, sgfCoordToXY, toSgfCoord, weightedBookCandidate } from './shusakuBook'
+import { bookCandidates, ensureShusakuBook, sgfCoordToXY, toSgfCoord, weightedBookCandidate } from './shusakuBook'
 
 describe('秀策开局库', () => {
-  it('根节点候选是秀策流的标志性起手（右上小目 qd 等）', () => {
+  it('根节点候选是秀策流的标志性起手（右上小目 qd 等）', async () => {
+    await ensureShusakuBook()
     const root = bookCandidates([])
     expect(root).not.toBeNull()
     expect(Object.keys(root!).length).toBeGreaterThan(0)
     expect(root).toHaveProperty('qd') // 16之4 = 右上小目
   })
 
-  it('不存在的路径返回 null', () => {
+  it('不存在的路径返回 null', async () => {
+    await ensureShusakuBook()
     // 两个天元起手不可能出现在任何谱中
     expect(bookCandidates([{ x: 9, y: 9 }, { x: 9, y: 9 }])).toBeNull()
   })
