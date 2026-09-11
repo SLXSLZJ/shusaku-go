@@ -10,6 +10,7 @@ import type { GamePosition } from './engine/protocol'
 import { strengthLevel } from './engine/strength'
 import { COLUMN_LETTERS } from './render/boardRenderer'
 import { BoardCanvas } from './ui/BoardCanvas'
+import { MusicWidget } from './ui/MusicWidget'
 import { DEFAULT_CONFIG, GameSetup, type GameConfig } from './ui/GameSetup'
 
 declare global {
@@ -77,6 +78,8 @@ export default function App() {
   const aiPlayerNum: 0 | 1 | 2 = applied.aiSide === 'black' ? BLACK : applied.aiSide === 'white' ? WHITE : 0
   const appliedRef = useRef(applied)
   appliedRef.current = applied
+  /** 人方视角胜率（驱动背景音乐随局势切换） */
+  const humanWinrate = blackWinrate === null ? null : aiPlayerNum === BLACK ? 1 - blackWinrate : blackWinrate
   const humanTurn = !snap.isOver && !thinking && (applied.aiSide === 'none' || snap.turn !== aiPlayerNum)
 
   function getBackend(): Promise<EngineBackend> {
@@ -381,6 +384,8 @@ export default function App() {
             <span className="brand-sub">秀策 · shusaku-go</span>
           </div>
         </div>
+
+        <MusicWidget started={snap.moveNumber > 0} serious={applied.strength >= 8} winrate={humanWinrate} />
 
         <section className="panel">
           <div className="state-row">
