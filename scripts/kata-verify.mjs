@@ -86,6 +86,25 @@ ws.onmessage = (ev) => {
 }
 await new Promise((r) => (ws.onopen = r))
 
+// 抓取页面异常与 console.error
+ws.onmessage = wrap(ws.onmessage)
+function wrap(orig) {
+  return (ev) => {
+    try {
+      const msg = JSON.parse(ev.data)
+      if (msg.method === 'Runtime.exceptionThrown') {
+        const d = msg.params.exceptionDetails
+        console.log('!! 页面异常:', String(d.exception?.description ?? d.text).slice(0, 300))
+      } else if (msg.method === 'Runtime.consoleAPICalled' && msg.params.type === 'error') {
+        console.log('!! console.error:', msg.params.args.map((a) => a.value ?? a.description ?? '').join(' ').slice(0, 300))
+      }
+    } catch {}
+    if (orig) orig(ev)
+  }
+}
+
+await send('Runtime.enable')
+
 function send(method, params = {}) {
   const id = ++seq
   ws.send(JSON.stringify({ id, method, params }))
@@ -125,9 +144,28 @@ for (let i = 0; i < 90; i++) {
 }
 console.log('引擎:', engine || '(未就绪)')
 
-// Hero 占首屏：先滚动到对局区再点击棋盘
+// Hero 占首屏 + 开始前隐藏棋盘：滚到对局区、点「开始新局」、展开棋谱
 await evalJs('document.querySelector(".game-section")?.scrollIntoView({ behavior: "instant" })')
-await sleep(800)
+await sleep(600)
+const clickStart = await evalJs(
+  '(() => { const b = [...document.querySelectorAll(".btn")].find((x) => x.textContent === "开始新局"); if (!b) return "no-btn"; b.click(); return "clicked" })()',
+)
+console.log('开始新局:', clickStart)
+await sleep(300)
+console.log(
+  '棋谱展开:',
+  await evalJs(
+    '(() => { const t = document.querySelector(".log-panel .panel-toggle"); if (!t) return "no-toggle"; t.click(); return "ok" })()',
+  ),
+)
+await sleep(500)
+console.log(
+  '点击后:',
+  await evalJs(
+    'JSON.stringify({ side: !!document.querySelector(".side"), area: !!document.querySelector(".board-area"), canvas: !!document.querySelector(".board-canvas"), setupOpen: !!document.querySelector(".setup-body"), mainCount: document.querySelectorAll("main").length })',
+  ),
+)
+await sleep(400)
 
 // 黑方落子（棋盘中心）
 const dims = await evalJs(
@@ -139,11 +177,24 @@ if (dims.top < 0 || dims.top > 900) {
   await evalJs('document.querySelector(".game-section")?.scrollIntoView({ block: "start" })')
   await sleep(800)
 }
-const dims2 = await evalJs(
-  '(() => { const c = document.querySelector(".board-canvas"); const r = c.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 } })()',
-)
-await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: dims2.x, y: dims2.y, button: 'left', clickCount: 1 })
-await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: dims2.x, y: dims2.y, button: 'left', clickCount: 1 })
+// AI 执黑时先等 AI 的自动首手，再在空点落白子（逐个偏移试）
+let moveBefore = -1
+for (const off of [0, 0.18, -0.18, 0.3]) {
+  for (let i = 0; i < 30; i++) {
+    const s = await evalJs('document.querySelectorAll(".log li").length')
+    if (s !== null && s > moveBefore) { moveBefore = s; break }
+    await sleep(1000)
+  }
+  const d2 = await evalJs(
+    '(() => { const c = document.querySelector(".board-canvas"); const r = c.getBoundingClientRect(); const off = ' + off + ' * r.width; return { x: r.x + r.width / 2 + off, y: r.y + r.height / 2 - off * 0.6 } })()',
+  )
+  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: d2.x, y: d2.y, button: 'left', clickCount: 1 })
+  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: d2.x, y: d2.y, button: 'left', clickCount: 1 })
+  await sleep(3000)
+  const now = await evalJs('document.querySelectorAll(".log li").length')
+  console.log(`落子尝试(offset=${off}): 手数 ${moveBefore} → ${now}`)
+  if (now !== null && now >= moveBefore + 1) break
+}
 console.log('已落黑子于棋盘中心，等待 AI 应答……')
 
 // 等 AI 应答（手数 ≥ 2），最多 4 分钟

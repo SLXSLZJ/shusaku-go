@@ -185,6 +185,28 @@ body {
   height: 100vh;
 }
 
+/* 开始对局后内容滑入 */
+.enter-slide {
+  animation: enter-slide 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes enter-slide {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter-slide {
+    animation: none;
+  }
+}
+
 /* ── 侧栏 ─────────────────────────────── */
 
 .side {
@@ -734,6 +756,10 @@ body {
     height: auto;
     min-height: 100%;
     overflow: visible;
+  }
+
+  .board-area {
+    padding-bottom: 76px;
   }
 
   .side {

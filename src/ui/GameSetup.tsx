@@ -22,7 +22,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   rules: 'chinese',
   komi: 6.5,
   handicap: 0,
-  aiSide: 'white',
+  aiSide: 'black',
   strength: 5,
   aiStyle: 'shusaku',
 }
@@ -68,7 +68,12 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
     onChange({ size, komi: config.handicap > 0 ? 0.5 : defaultKomiFor(size, config.rules) })
 
   const setHandicap = (h: number): void =>
-    onChange({ handicap: h, komi: h > 0 ? 0.5 : defaultKomiFor(config.size, config.rules) })
+    onChange({
+      handicap: h,
+      komi: h > 0 ? 0.5 : defaultKomiFor(config.size, config.rules),
+      // 让先/让子时白方为 AI；分先默认 AI 执黑先行
+      aiSide: h > 0 ? 'white' : 'black',
+    })
 
   return (
     <section className="panel setup-panel">
@@ -93,6 +98,7 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
             style={{ overflow: 'hidden' }}
           >
           <div className="setup-row">
+            <span className="setup-label">棋盘</span>
             {SIZES.map((s) => (
               <button
                 key={s.value}
@@ -107,6 +113,7 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
           </div>
 
           <div className="setup-row">
+            <span className="setup-label">规则</span>
             <button
               type="button"
               className={btnCls(config.rules === 'chinese')}
@@ -140,7 +147,7 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
 
           <div className="setup-row">
             <span className="setup-label">让子</span>
-            {[0, 2, 3, 4, 5, 6, 7, 8, 9].map((h) => (
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((h) => (
               <button
                 key={h}
                 type="button"
@@ -148,12 +155,13 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
                 disabled={disabled}
                 onClick={() => setHandicap(h)}
               >
-                {h === 0 ? '无' : h}
+                {h === 0 ? '无' : h === 1 ? '让先' : h}
               </button>
             ))}
           </div>
 
           <div className="setup-row">
+            <span className="setup-label">先手</span>
             <button
               type="button"
               className={btnCls(config.aiSide === 'white')}
@@ -165,7 +173,8 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
             <button
               type="button"
               className={btnCls(config.aiSide === 'black')}
-              disabled={disabled}
+              disabled={disabled || config.handicap > 0}
+              title={config.handicap > 0 ? '让先/让子对局中 AI 执白' : undefined}
               onClick={() => onChange({ aiSide: 'black' })}
             >
               AI 执黑
@@ -181,6 +190,7 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
           </div>
 
           <div className="setup-row">
+            <span className="setup-label">模式</span>
             <button
               type="button"
               className={btnCls(config.aiStyle === 'shusaku')}

@@ -71,6 +71,8 @@ export default function App() {
   const [engineName, setEngineName] = useState<string | null>(null)
   const [engineProgress, setEngineProgress] = useState<EngineProgress | null>(null)
   const [setupOpen, setSetupOpen] = useState(true)
+  const [gameStarted, setGameStarted] = useState(false)
+  const [logOpen, setLogOpen] = useState(false)
   const [announce, setAnnounce] = useState<MoveAnnounce | null>(null)
   const [announceKey, setAnnounceKey] = useState(0)
   const [territoryOn, setTerritoryOn] = useState(false)
@@ -175,6 +177,8 @@ export default function App() {
 
   // ── AI 行棋 ──
   useEffect(() => {
+    // 开始新局之前不驱动 AI（否则会在看不见的初始棋盘上自行落子）
+    if (!gameStarted) return
     if (applied.aiSide === 'none') return
     if (snap.isOver || snap.turn !== aiPlayerNum || thinkingRef.current) return
     thinkingRef.current = true
@@ -343,9 +347,14 @@ export default function App() {
     setResignSide(null)
     setSetupOpen(false)
     setAnnounce(null)
+    setGameStarted(true)
     scoringRequestedRef.current = false
     lowStreakRef.current = 0
     sync()
+    // 首次开始时滑入对局区（Hero 仍占首屏的场景）
+    requestAnimationFrame(() => {
+      document.querySelector('.game-section')?.scrollIntoView({ behavior: 'smooth' })
+    })
   }
 
   const handleBenchmark = (): void => {
@@ -453,11 +462,40 @@ export default function App() {
           onBenchmark={handleBenchmark}
         />
 
-        <div className={status ? (status.kind === 'error' ? 'status error' : 'status') : 'status empty'}>
+        {gameStarted && (
+          <>
+        <section className="panel log-panel enter-slide">
+          <button
+            type="button"
+            className="panel-toggle"
+            onClick={() => setLogOpen((o) => !o)}
+            aria-expanded={logOpen}
+          >
+            <span className="panel-title">棋 谱</span>
+            <span className="tiny dim">{logOpen ? '收起 ▾' : '展开 ▸'}</span>
+          </button>
+          {logOpen &&
+            (log.length === 0 ? (
+              <div className="dim log-empty">{applied.aiSide === 'black' ? 'AI 执黑先行。' : '黑先行。点击棋盘落子。'}</div>
+            ) : (
+              <ol className="log">
+                {log.map((m, i) => (
+                  <li key={logOffset + i}>
+                    <span className="log-n dim">{logOffset + i + 1}</span>
+                    <span>{m.player === BLACK ? '黑' : '白'}</span>
+                    <span>{m.kind === 'pass' ? '虚着' : coordText(snap.size, m.x, m.y)}</span>
+                    <span className="dim">{m.captured.length > 0 ? `提${m.captured.length}` : ''}</span>
+                  </li>
+                ))}
+              </ol>
+            ))}
+        </section>
+
+        <div className={'status enter-slide ' + (status ? (status.kind === 'error' ? 'error' : '') : 'empty')}>
           {status ? status.text : '　'}
         </div>
 
-        <section className="panel">
+        <section className="panel enter-slide">
           <div className="btn-row">
             <button className="btn" onClick={handlePass} disabled={!humanTurn || !!scoring}>
               虚着
@@ -475,26 +513,8 @@ export default function App() {
           </div>
         </section>
 
-        <section className="panel log-panel">
-          <div className="panel-title">棋 谱</div>
-          {log.length === 0 ? (
-            <div className="dim log-empty">{applied.aiSide === 'black' ? 'AI 执黑先行。' : '黑先行。点击棋盘落子。'}</div>
-          ) : (
-            <ol className="log">
-              {log.map((m, i) => (
-                <li key={logOffset + i}>
-                  <span className="log-n dim">{logOffset + i + 1}</span>
-                  <span>{m.player === BLACK ? '黑' : '白'}</span>
-                  <span>{m.kind === 'pass' ? '虚着' : coordText(snap.size, m.x, m.y)}</span>
-                  <span className="dim">{m.captured.length > 0 ? `提${m.captured.length}` : ''}</span>
-                </li>
-              ))}
-            </ol>
-          )}
-        </section>
-
         {blackWinrate !== null && !snap.isOver && (
-          <section className="panel wr-panel">
+          <section className="panel wr-panel enter-slide">
             <div className="panel-title">胜 率 估 算</div>
             <div
               className="wr-bar"
@@ -512,16 +532,18 @@ export default function App() {
             </div>
           </section>
         )}
+          </>
+        )}
       </aside>
 
-      <main className="board-area">
+      {gameStarted && (
+      <main className="board-area enter-slide">
         {engineProgress && engineProgress.stage !== 'ready' && (
           <div className="engine-banner" role="status" aria-live="polite">
             <span>
               {engineProgress.stage === 'main'
                 ? 'AI 引擎准备中 · 下载棋力网络'
                 : '秀策棋风网络加载中'}
-              （页面不卡，可先看棋盘）
             </span>
             <div
               className="engine-progress"
@@ -588,6 +610,7 @@ export default function App() {
           </button>
         </div>
       </main>
+      )}
       </div>
       </main>
     </>
