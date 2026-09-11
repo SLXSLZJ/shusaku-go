@@ -130,6 +130,10 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
             >
               日本规则
             </button>
+          </div>
+
+          <div className="setup-row">
+            <span className="setup-label">贴目</span>
             <input
               className="num-input"
               type="number"
@@ -210,18 +214,20 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
           </div>
 
           <div className="setup-row">
-            <span className="setup-label">认真</span>
+            <span className="setup-label">认真度</span>
             <input
               className="range"
               type="range"
               min={1}
               max={10}
-              step={1}
+              step={0.05}
               value={config.strength}
               disabled={disabled}
               onChange={(e) => onChange({ strength: Number(e.target.value) })}
             />
-            <span className="tiny dim">{STRENGTH_LEVELS[config.strength - 1]?.label ?? ''}</span>
+            <span className="tiny dim">
+              {STRENGTH_LEVELS[Math.round(config.strength) - 1]?.label ?? ''}
+            </span>
           </div>
 
           <div className="btn-row">

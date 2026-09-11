@@ -191,7 +191,7 @@ export default function App() {
       // 秀策流：1850 年代日本职业棋手的行棋分布；高强度档改用「人形 + 搜索托底」
       humanSl:
         applied.aiStyle === 'shusaku'
-          ? { profile: 'proyear_1850', style: applied.strength >= 8 ? ('search' as const) : ('imitate' as const) }
+          ? { profile: 'proyear_1850', style: Math.round(applied.strength) >= 8 ? ('search' as const) : ('imitate' as const) }
           : undefined,
     }
     const run = (): void => {
@@ -402,7 +402,7 @@ export default function App() {
           </div>
         </div>
 
-        <MusicWidget started={snap.moveNumber > 0} serious={applied.strength >= 8} winrate={humanWinrate} />
+        <MusicWidget started={snap.moveNumber > 0} serious={Math.round(applied.strength) >= 8} winrate={humanWinrate} />
 
         <section className="panel">
           <div className="state-row">
