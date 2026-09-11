@@ -1,12 +1,17 @@
 :root {
-  --ink: #171310;
-  --ink-2: #221c15;
-  --paper: #ead9b8;
-  --paper-dim: #9d8f74;
-  --line: #453b2c;
-  --gold: #c9a35c;
+  /* SAI之棋 · 光与佐为色系（自 Hero 视频取色）：
+     夜空靛 → 水蓝 → 光金强调，樱粉/佐为紫点缀 */
+  --ink: #0d1120;
+  --ink-2: #141b30;
+  --paper: #e8e6f2;
+  --paper-dim: #8e93ad;
+  --line: #2a3350;
+  --gold: #e5c57e;
   --shu: #b64a2b;
   --error: #d3704f;
+  --water: #27406b;
+  --sakura: #f2b8c6;
+  --sai: #9d7bd8;
 }
 
 * {
@@ -21,17 +26,163 @@ body,
 
 body {
   margin: 0;
-  background: radial-gradient(1200px 800px at 70% -10%, #241d14 0%, var(--ink) 60%);
+  background:
+    radial-gradient(1100px 700px at 72% -6%, #1a2340 0%, transparent 55%),
+    radial-gradient(900px 600px at 12% 30%, #101830 0%, transparent 60%),
+    var(--ink);
   color: var(--paper);
   font-family: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
   font-size: 15px;
   line-height: 1.6;
 }
 
+/* ── 氛围粒子层 ───────────────────────── */
+
+.ambient-particles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── 首屏 Hero ────────────────────────── */
+
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --hero-fade: 1;
+}
+
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center top;
+  animation: hero-parallax linear both;
+  animation-timeline: scroll(root);
+}
+
+@keyframes hero-parallax {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(14%) scale(1.06);
+  }
+}
+
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(13, 17, 32, 0.55) 0%, transparent 30%, transparent 55%, var(--ink) 98%),
+    radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(13, 17, 32, 0.5) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  opacity: var(--hero-fade);
+  animation: hero-fadeout linear both;
+  animation-timeline: scroll(root);
+  animation-range: 0 90vh;
+}
+
+@keyframes hero-fadeout {
+  to {
+    opacity: 0;
+    transform: translateY(-8vh);
+  }
+}
+
+.hero-title {
+  margin: 0;
+  font-size: clamp(52px, 9vw, 110px);
+  font-weight: 600;
+  color: #f4eede;
+  text-shadow:
+    0 0 22px rgba(229, 197, 126, 0.35),
+    0 2px 30px rgba(13, 17, 32, 0.8);
+}
+
+.hero-sub {
+  margin: 18px 0 0;
+  font-size: clamp(14px, 1.6vw, 18px);
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  color: #d5d7e8;
+  text-shadow: 0 1px 12px rgba(13, 17, 32, 0.9), 0 0 4px rgba(13, 17, 32, 0.8);
+}
+
+.hero-cta {
+  margin-top: 42px;
+  font: inherit;
+  font-size: 16px;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  color: var(--gold);
+  background: rgba(13, 17, 32, 0.45);
+  border: 1px solid rgba(229, 197, 126, 0.55);
+  border-radius: 2px;
+  padding: 12px 40px;
+  cursor: pointer;
+  touch-action: manipulation;
+  backdrop-filter: blur(3px);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-cta:hover {
+  background: rgba(229, 197, 126, 0.12);
+  box-shadow: 0 0 24px rgba(229, 197, 126, 0.25);
+}
+
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  color: var(--paper-dim);
+  font-size: 22px;
+  animation: hero-bounce 2.2s ease-in-out infinite;
+}
+
+@keyframes hero-bounce {
+  0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+  50% { transform: translate(-50%, 8px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { animation: none; }
+  .hero-content { animation: none; }
+  .hero-scroll-hint { animation: none; }
+}
+
+/* ── 对局区（Hero 之下） ──────────────── */
+
+.game-section {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
 .app {
   display: flex;
-  height: 100%;
-  overflow: hidden;
+  height: 100vh;
 }
 
 /* ── 侧栏 ─────────────────────────────── */
@@ -51,41 +202,44 @@ body {
 
 .brand-block {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  flex-direction: column;
+  gap: 6px;
   margin-bottom: 4px;
+}
+
+.brand-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .brand {
   margin: 0;
-  font-size: 34px;
+  font-size: 24px;
   font-weight: 600;
-  letter-spacing: 0.22em;
-  writing-mode: vertical-rl;
+  letter-spacing: 0.18em;
   line-height: 1.1;
 }
 
 .brand-meta {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding-top: 4px;
+  gap: 4px;
 }
 
 .seal {
   width: 26px;
   height: 26px;
-  background: var(--shu);
-  color: #f6ecd9;
+  background: var(--sai);
+  color: #f6f2ff;
   font-size: 15px;
   display: grid;
   place-items: center;
   border-radius: 3px;
+  flex: none;
 }
 
 .brand-sub {
-  writing-mode: vertical-rl;
   font-size: 11px;
   color: var(--paper-dim);
   letter-spacing: 0.14em;
@@ -151,7 +305,7 @@ body {
 
 .btn:hover:not(:disabled) {
   border-color: var(--gold);
-  background: rgba(201, 163, 92, 0.06);
+  background: rgba(229, 197, 126, 0.06);
 }
 
 .btn:disabled {
@@ -161,7 +315,7 @@ body {
 
 .btn.active {
   border-color: var(--gold);
-  background: rgba(201, 163, 92, 0.12);
+  background: rgba(229, 197, 126, 0.12);
 }
 
 .btn:focus-visible {
@@ -373,8 +527,8 @@ body {
 }
 
 .music-select option {
-  color: #1a1714;
-  background: #f3ede0;
+  color: #141b30;
+  background: #e8e6f2;
 }
 
 .music-now {
@@ -422,7 +576,7 @@ body {
 
 .banner {
   border: 1px solid var(--gold);
-  background: rgba(201, 163, 92, 0.08);
+  background: rgba(229, 197, 126, 0.08);
   padding: 6px 10px;
   font-size: 13.5px;
   border-radius: 2px;
@@ -541,7 +695,7 @@ body {
   font-size: 18px;
   letter-spacing: 0.14em;
   color: var(--paper);
-  background: rgba(23, 19, 16, 0.85);
+  background: rgba(13, 17, 32, 0.85);
   border: 1px solid var(--line);
   border-radius: 2px;
   padding: 5px 20px;

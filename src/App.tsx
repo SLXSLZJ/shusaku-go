@@ -10,6 +10,8 @@ import type { GamePosition } from './engine/protocol'
 import { strengthLevel } from './engine/strength'
 import { COLUMN_LETTERS } from './render/boardRenderer'
 import { BoardCanvas } from './ui/BoardCanvas'
+import { AmbientParticles } from './ui/AmbientParticles'
+import { Hero } from './ui/Hero'
 import { MusicWidget } from './ui/MusicWidget'
 import { DEFAULT_CONFIG, GameSetup, type GameConfig } from './ui/GameSetup'
 
@@ -375,13 +377,19 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <>
+      <AmbientParticles />
+      <Hero />
+      <main className="game-section">
+      <div className="app">
       <aside className="side">
         <div className="brand-block">
-          <h1 className="brand">手談</h1>
-          <div className="brand-meta">
+          <div className="brand-main">
             <span className="seal">弈</span>
-            <span className="brand-sub">秀策 · shusaku-go</span>
+            <h1 className="brand">SAI之棋</h1>
+          </div>
+          <div className="brand-meta">
+            <span className="brand-sub">棋魂 · 本因坊秀策的 AI 对弈</span>
           </div>
         </div>
 
@@ -580,6 +588,8 @@ export default function App() {
           </button>
         </div>
       </main>
-    </div>
+      </div>
+      </main>
+    </>
   )
 }

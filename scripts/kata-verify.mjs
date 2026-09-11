@@ -125,13 +125,25 @@ for (let i = 0; i < 90; i++) {
 }
 console.log('引擎:', engine || '(未就绪)')
 
+// Hero 占首屏：先滚动到对局区再点击棋盘
+await evalJs('document.querySelector(".game-section")?.scrollIntoView({ behavior: "instant" })')
+await sleep(800)
+
 // 黑方落子（棋盘中心）
 const dims = await evalJs(
-  '(() => { const c = document.querySelector(".board-canvas"); if (!c) return null; const r = c.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 } })()',
+  '(() => { const c = document.querySelector(".board-canvas"); if (!c) return null; const r = c.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, top: r.top, h: r.height } })()',
 )
-if (!dims) throw new Error('未找到棋盘画布')
-await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: dims.x, y: dims.y, button: 'left', clickCount: 1 })
-await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: dims.x, y: dims.y, button: 'left', clickCount: 1 })
+console.log('棋盘位置:', JSON.stringify(dims))
+if (!dims || !dims.x) throw new Error('未找到棋盘画布')
+if (dims.top < 0 || dims.top > 900) {
+  await evalJs('document.querySelector(".game-section")?.scrollIntoView({ block: "start" })')
+  await sleep(800)
+}
+const dims2 = await evalJs(
+  '(() => { const c = document.querySelector(".board-canvas"); const r = c.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 } })()',
+)
+await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: dims2.x, y: dims2.y, button: 'left', clickCount: 1 })
+await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: dims2.x, y: dims2.y, button: 'left', clickCount: 1 })
 console.log('已落黑子于棋盘中心，等待 AI 应答……')
 
 // 等 AI 应答（手数 ≥ 2），最多 4 分钟
