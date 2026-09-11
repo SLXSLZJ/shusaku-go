@@ -35,10 +35,19 @@ const TFJS_FILES = [
   { file: 'tfjs-backend-wasm-threaded-simd.worker.js', url: `${TFJS_PKG}/wasm-out/tfjs-backend-wasm-threaded-simd.worker.js` },
 ]
 
-async function download(url, dest) {
-  const res = await fetch(url)
-  if (!res.ok || !res.body) throw new Error(`${url} → HTTP ${res.status}`)
-  await pipeline(res.body, createWriteStream(dest))
+async function download(url, dest, retries = 2) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await fetch(url)
+      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`)
+      await pipeline(res.body, createWriteStream(dest))
+      return
+    } catch (err) {
+      if (attempt >= retries) throw new Error(`${url} → ${err.message}`)
+      process.stdout.write(` 重试(${attempt + 1})…`)
+      await new Promise((r) => setTimeout(r, 3000))
+    }
+  }
 }
 
 async function main() {
@@ -64,7 +73,13 @@ async function main() {
       continue
     }
     process.stdout.write(`下载 tfjs/${m.file} …`)
-    await download(m.url, dest)
+    try {
+      await download(m.url, dest)
+    } catch (err) {
+      // tfjs 运行时文件缺失只影响多线程/加速，不阻断构建
+      console.log(` 失败（${err.message}）——继续`)
+      continue
+    }
     // npm 包里 wasm-out 的 worker 文件是 Node 包装（module.exports.wasmWorkerContents
     // = `..."`，反引号模板串），浏览器不能直接 importScripts——解出内层纯 JS 再落盘
     if (m.file.endsWith('.worker.js')) {
