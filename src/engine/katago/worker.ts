@@ -137,6 +137,22 @@ function describeError(err: unknown): string {
   return String(err);
 }
 
+function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
 async function initWasmBackend(): Promise<void> {
   try {
     // Vite serves `public/` at the site root.
@@ -144,16 +160,25 @@ async function initWasmBackend(): Promise<void> {
     // Use a reasonable thread count for XNNPACK when cross-origin isolated (SharedArrayBuffer).
     // Without COOP/COEP headers, browsers disable threads and TFJS will fall back to single-threaded wasm.
     const isCrossOriginIsolated = (globalThis as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true;
-    if (isCrossOriginIsolated) {
+    // 无头浏览器（CI/无头验证）里嵌套线程 Worker 会挂起——保持单线程
+    const isHeadless = navigator.userAgent.includes('HeadlessChrome');
+    if (isCrossOriginIsolated && !isHeadless) {
       // Cores minus headroom for the UI, held down further on a machine short
       // of memory. See utils/workerThreads for why memory is only trusted
       // below 4GB.
       setThreadsCount(detectSearchThreadCount());
     }
     // setBackend resolves false, without throwing, when the backend fails to
-    // initialise; the old bare await treated that as success.
-    if (!(await tf.setBackend('wasm'))) throw new Error('tf.setBackend(\'wasm\') returned false');
-    await tf.ready();
+    // initialise; the old bare await treated that as success. 线程 Worker 万一
+    // 挂起也不能卡死引擎：限时 20s，超时走 CPU 兜底。
+    await withTimeout(
+      (async () => {
+        if (!(await tf.setBackend('wasm'))) throw new Error('tf.setBackend(\'wasm\') returned false');
+        await tf.ready();
+      })(),
+      20_000,
+      'wasm backend init timed out',
+    );
     return;
   } catch (err) {
     backendNote = [backendNote, `WASM backend failed (${describeError(err)}); using the CPU backend`]

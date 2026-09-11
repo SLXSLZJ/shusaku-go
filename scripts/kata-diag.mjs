@@ -6,6 +6,7 @@ import { writeFileSync } from 'node:fs'
 
 const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 const WAIT_S = parseInt(process.argv[2] ?? '90', 10)
+const TARGET_URL = process.argv[4] ?? 'http://localhost:5173/'
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
@@ -40,7 +41,7 @@ function spawnEdgeOnPort(p) {
       '--disable-hang-monitor',
       '--no-first-run',
       '--window-size=1400,1000',
-      'http://localhost:5173/',
+      TARGET_URL,
     ],
     { stdio: 'ignore' },
   )
@@ -57,7 +58,7 @@ const target = await (async () => {
   for (let i = 0; i < 20; i++) {
     const r = await fetch('http://127.0.0.1:' + port + '/json')
     const list = await r.json()
-    const page = list.find((t) => t.type === 'page' && t.url.includes('localhost'))
+    const page = list.find((t) => t.type === 'page')
     if (page) return page
     await sleep(500)
   }
