@@ -4,7 +4,7 @@
  *
  * 用法：node scripts/fetch-models.mjs
  */
-import { createWriteStream, existsSync, mkdirSync, statSync } from 'node:fs'
+import { createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import path from 'node:path'
 
@@ -65,7 +65,22 @@ async function main() {
     }
     process.stdout.write(`下载 tfjs/${m.file} …`)
     await download(m.url, dest)
-    console.log(` 完成（${Math.round(statSync(dest).size / 1e3)}KB）`)
+    // npm 包里 wasm-out 的 worker 文件是 Node 包装（module.exports.wasmWorkerContents
+    // = `..."`，反引号模板串），浏览器不能直接 importScripts——解出内层纯 JS 再落盘
+    if (m.file.endsWith('.worker.js')) {
+      const wrapped = readFileSync(dest, 'utf8')
+      if (!wrapped.startsWith('module.exports.wasmWorkerContents')) {
+        throw new Error(`worker 文件格式异常：${m.file}`)
+      }
+      const mod = { exports: {} }
+      new Function('module', `${wrapped}; return module.exports.wasmWorkerContents;`)(mod)
+      const raw = mod.exports.wasmWorkerContents
+      if (typeof raw !== 'string' || raw.length < 1000) throw new Error(`worker 解包失败：${m.file}`)
+      writeFileSync(dest, raw)
+      console.log(` 完成（解包 ${Math.round(statSync(dest).size / 1e3)}KB）`)
+    } else {
+      console.log(` 完成（${Math.round(statSync(dest).size / 1e3)}KB）`)
+    }
     fetched++
   }
 
