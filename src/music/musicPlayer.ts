@@ -52,9 +52,8 @@ class MusicPlayer {
     this.onEnded = onEnded
   }
 
-  /** 首次用户手势后解锁（自动播放策略）。 */
+  /** 用户手势后解锁（或自动播放被拒后的重试入口）：尝试播出期望曲目。 */
   unlock(): void {
-    if (this.unlocked) return
     this.unlocked = true
     this.applyCurrent()
   }
@@ -90,10 +89,22 @@ class MusicPlayer {
   }
 
   private applyCurrent(): void {
-    if (!this.unlocked) return
     const d = this.desired
     if (!d) {
       this.stopAll()
+      return
+    }
+    if (!this.unlocked) {
+      // 浏览器自动播放策略解锁前：先把曲目预载好，解锁瞬间即可出声
+      if (d.id !== this.currentId) {
+        const el = this.activeEl()
+        const track = trackById(d.id)
+        if (track) {
+          el.src = trackUrl(track)
+          el.loop = d.loop
+          el.load()
+        }
+      }
       return
     }
     if (this.paused) {

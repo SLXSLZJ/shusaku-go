@@ -34,6 +34,18 @@ body {
   font-family: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
   font-size: 15px;
   line-height: 1.6;
+  position: relative;
+}
+
+/* 抖动噪点层：打散深色渐变的色彩断层（banding） */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* ── 氛围粒子层 ───────────────────────── */
@@ -73,6 +85,16 @@ body {
   transform-origin: center top;
   animation: hero-parallax linear both;
   animation-timeline: scroll(root);
+}
+
+/* 超宽屏 / 竖屏：整幅画面完整呈现，两侧或上下以夜空靛补底 */
+@media (min-aspect-ratio: 21/9), (max-aspect-ratio: 4/5) {
+  .hero-video {
+    object-fit: contain;
+  }
+  .hero-media {
+    background: var(--ink);
+  }
 }
 
 @keyframes hero-parallax {
@@ -412,9 +434,10 @@ body {
 
 .setup-label {
   flex: none;
-  width: 2.6em;
+  width: 3.2em;
   font-size: 12px;
   color: var(--paper-dim);
+  white-space: nowrap;
 }
 
 .num-input {
@@ -432,6 +455,13 @@ body {
   flex: 1;
   min-width: 90px;
   accent-color: var(--gold);
+}
+
+/* 认真度档位名：固定宽度，避免文字宽窄变化抽动滑条 */
+.strength-label {
+  flex: none;
+  width: 4.6em;
+  text-align: right;
 }
 
 .tiny {
@@ -658,7 +688,7 @@ body {
   gap: 14px;
   padding: 20px;
   /* 底部留白：给 Netlify「powered by」徽标让位，避免盖住棋盘右下角 */
-  padding-bottom: 58px;
+  padding-bottom: 104px;
   min-width: 0;
   min-height: 0;
   position: relative;
@@ -759,7 +789,7 @@ body {
   }
 
   .board-area {
-    padding-bottom: 76px;
+    padding-bottom: 128px;
   }
 
   .side {

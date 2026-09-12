@@ -79,10 +79,18 @@ export function MusicWidget({ started, serious, winrate }: MusicWidgetProps) {
       },
       () => musicPlayer.apply(computeDesired(true)),
     )
-    // 任意首次点击解锁自动播放（浏览器策略）
+    // 进站即尝试播放：浏览器策略允许时直接出声；被拒则预载曲目，
+    // 等任意首次手势（点击/触摸/按键）解锁
+    musicPlayer.unlock()
     const unlock = (): void => musicPlayer.unlock()
     document.addEventListener('pointerdown', unlock, { once: true })
-    return () => document.removeEventListener('pointerdown', unlock)
+    document.addEventListener('touchstart', unlock, { once: true })
+    document.addEventListener('keydown', unlock, { once: true })
+    return () => {
+      document.removeEventListener('pointerdown', unlock)
+      document.removeEventListener('touchstart', unlock)
+      document.removeEventListener('keydown', unlock)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

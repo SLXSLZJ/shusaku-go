@@ -225,7 +225,7 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
               disabled={disabled}
               onChange={(e) => onChange({ strength: Number(e.target.value) })}
             />
-            <span className="tiny dim">
+            <span className="tiny dim strength-label">
               {STRENGTH_LEVELS[Math.round(config.strength) - 1]?.label ?? ''}
             </span>
           </div>

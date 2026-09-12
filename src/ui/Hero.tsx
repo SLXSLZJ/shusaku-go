@@ -61,14 +61,6 @@ export function Hero() {
         >
           SAI之棋
         </motion.h1>
-        <motion.p
-          className="hero-sub"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.7, ease: 'easeOut' }}
-        >
-          棋魂 · 本因坊秀策的 AI 对弈
-        </motion.p>
         <motion.button
           type="button"
           className="hero-cta"

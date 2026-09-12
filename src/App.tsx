@@ -6,6 +6,7 @@ import { BLACK, WHITE, type BoardSize, type PlayError, type Point } from './core
 import { describeLastMoveParts, type MoveAnnounce } from './engine/commentary'
 import { getEngineBackend, type EngineBackend, type EngineProgress } from './engine/engineFacade'
 import { warmHumanModel } from './engine/katagoTsBackend'
+import { playStoneSound } from './sound/stoneSound'
 import type { GamePosition } from './engine/protocol'
 import { strengthLevel } from './engine/strength'
 import { COLUMN_LETTERS } from './render/boardRenderer'
@@ -215,6 +216,7 @@ export default function App() {
             announceLast()
           } else {
             g.play(res.move.x, res.move.y)
+            playStoneSound()
             announceLast()
           }
           setBlackWinrate(res.blackWinrate)
@@ -293,6 +295,7 @@ export default function App() {
     if (!humanTurn) return
     const r = gameRef.current.play(x, y)
     if (r.ok) {
+      playStoneSound()
       setStatus(null)
       if (applied.aiSide !== 'none' && !gameRef.current.isOver) {
         getBackend()
@@ -396,9 +399,6 @@ export default function App() {
           <div className="brand-main">
             <span className="seal">弈</span>
             <h1 className="brand">SAI之棋</h1>
-          </div>
-          <div className="brand-meta">
-            <span className="brand-sub">棋魂 · 本因坊秀策的 AI 对弈</span>
           </div>
         </div>
 
