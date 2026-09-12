@@ -60,7 +60,12 @@ async function main() {
       continue
     }
     process.stdout.write(`下载 ${m.file} …`)
-    await download(m.url, dest)
+    try {
+      await download(m.url, dest, 4)
+    } catch (err) {
+      console.log(` 失败（${err.message}）`)
+      process.exit(1)
+    }
     console.log(` 完成（${Math.round(statSync(dest).size / 1e6)}MB）`)
     fetched++
   }
