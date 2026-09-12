@@ -1,0 +1,10 @@
+# 跨源隔离：AI 的多线程 WASM（SharedArrayBuffer）必需
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+
+# 模型与 wasm：内容不变式，永久缓存
+/models/*
+  Cache-Control: public, max-age=31536000, immutable
+/tfjs/*
+  Cache-Control: public, max-age=31536000, immutable
