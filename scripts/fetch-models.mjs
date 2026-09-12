@@ -51,9 +51,15 @@ async function download(url, dest, retries = 2) {
 }
 
 async function main() {
+  // CI 构建（Cloudflare Workers Builds 等）跳过大模型下载：
+  // 模型由 worker.js 代理官方源 + 边缘缓存提供（Workers 资产单文件上限 25MiB）
+  const skipModels = process.env.CI === 'true' || process.env.CI === '1'
   mkdirSync(OUT_DIR, { recursive: true })
   let fetched = 0
-  for (const m of MODELS) {
+  if (skipModels) {
+    console.log('CI 构建：跳过大模型下载（由 Worker 代理提供）。')
+  }
+  for (const m of skipModels ? [] : MODELS) {
     const dest = path.join(OUT_DIR, m.file)
     if (existsSync(dest) && statSync(dest).size > 1_000_000) {
       console.log(`已存在，跳过：${m.file}`)
