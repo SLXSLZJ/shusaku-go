@@ -392,12 +392,38 @@ export default function App() {
     <>
       <AmbientParticles />
       <Hero />
+      {engineProgress && engineProgress.stage !== 'ready' && (
+        <div className="engine-banner engine-banner-fixed" role="status" aria-live="polite">
+          <span>
+            {engineProgress.stage === 'main'
+              ? 'AI 引擎准备中 · 下载棋力网络'
+              : '秀策棋风网络加载中'}
+          </span>
+          <div
+            className="engine-progress"
+            role="progressbar"
+            aria-label="引擎模型下载进度"
+          >
+            <div
+              style={{
+                transform: `scaleX(${
+                  engineProgress.total > 0 ? engineProgress.received / engineProgress.total : 0
+                })`,
+              }}
+            />
+          </div>
+          <span className="tiny dim">
+            {engineProgress.total > 0
+              ? `${Math.round(engineProgress.received / 1e6)} / ${Math.round(engineProgress.total / 1e6)} MB`
+              : '　'}
+          </span>
+        </div>
+      )}
       <main className="game-section">
       <div className="app">
       <aside className="side">
         <div className="brand-block">
           <div className="brand-main">
-            <span className="seal">弈</span>
             <h1 className="brand">SAI之棋</h1>
           </div>
         </div>
@@ -408,13 +434,15 @@ export default function App() {
           <div className="state-row">
             <span className={`stone-dot ${snap.turn === BLACK ? 'black' : 'white'}`} aria-hidden />
             <span>
-              {snap.isOver
-                ? '终局'
-                : thinking
-                  ? 'AI 思考中……'
-                  : snap.turn === BLACK
-                    ? '黑方行棋'
-                    : '白方行棋'}
+              {engineProgress && engineProgress.stage !== 'ready'
+                ? 'AI 引擎准备中，首手稍久……'
+                : snap.isOver
+                  ? '终局'
+                  : thinking
+                    ? 'AI 思考中……'
+                    : snap.turn === BLACK
+                      ? '黑方行棋'
+                      : '白方行棋'}
             </span>
             <span className="dim">第 {snap.moveNumber} 手</span>
           </div>
@@ -538,33 +566,6 @@ export default function App() {
 
       {gameStarted && (
       <main className="board-area enter-slide">
-        {engineProgress && engineProgress.stage !== 'ready' && (
-          <div className="engine-banner" role="status" aria-live="polite">
-            <span>
-              {engineProgress.stage === 'main'
-                ? 'AI 引擎准备中 · 下载棋力网络'
-                : '秀策棋风网络加载中'}
-            </span>
-            <div
-              className="engine-progress"
-              role="progressbar"
-              aria-label="引擎模型下载进度"
-            >
-              <div
-                style={{
-                  transform: `scaleX(${
-                    engineProgress.total > 0 ? engineProgress.received / engineProgress.total : 0
-                  })`,
-                }}
-              />
-            </div>
-            <span className="tiny dim">
-              {engineProgress.total > 0
-                ? `${Math.round(engineProgress.received / 1e6)} / ${Math.round(engineProgress.total / 1e6)} MB`
-                : '　'}
-            </span>
-          </div>
-        )}
         <div className="announce-slot">
           <AnimatePresence mode="wait">
             {announce && (

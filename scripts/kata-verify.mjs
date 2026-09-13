@@ -15,24 +15,21 @@ const DEBUG_LOG = 'C:/Users/NewUser/AppData/Local/Temp/kata-console.log'
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 function spawnEdgeOnPort(port) {
-  const proc = spawn(
-    EDGE,
-    [
-      '--remote-debugging-port=' + port,
-      '--headless=new',
-      '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-kata-verify-' + Date.now() + '-' + port,
-      '--disable-http-cache',
-      '--disable-features=BackForwardCache',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding',
-      '--disable-hang-monitor',
-      '--no-first-run',
-      '--window-size=1400,1000',
-      URL,
-    ],
-    { stdio: 'ignore' },
-  )
-  return proc
+  const args = [
+    '--remote-debugging-port=' + port,
+    '--headless=new',
+    '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-kata-verify-' + Date.now() + '-' + port,
+    '--disable-http-cache',
+    '--disable-features=BackForwardCache',
+    '--disable-backgrounding-occluded-windows',
+    '--disable-renderer-backgrounding',
+    '--disable-hang-monitor',
+    '--no-first-run',
+    '--window-size=1400,1000',
+    URL,
+  ]
+  if (process.env.CDP_PROXY) args.splice(1, 0, '--proxy-server=' + process.env.CDP_PROXY)
+  return spawn(EDGE, args, { stdio: 'ignore' })
 }
 
 async function cdpReady(port) {

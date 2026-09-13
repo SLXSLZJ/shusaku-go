@@ -136,7 +136,7 @@ class MusicPlayer {
     next.volume = 0
     const startVol = cur.src ? cur.volume : 0
     void next.play().catch(() => {})
-    this.startFade(cur, startVol, 0, next, 0, 0.8)
+    this.startFade(cur, startVol, 0, next, 0, 0.45)
     this.activeIdx = nextIdx
     this.currentId = d.id
     this.emitState()

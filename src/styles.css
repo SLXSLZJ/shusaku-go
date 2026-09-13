@@ -87,8 +87,9 @@ body::before {
   animation-timeline: scroll(root);
 }
 
-/* 超宽屏 / 竖屏：整幅画面完整呈现，两侧或上下以夜空靛补底 */
-@media (min-aspect-ratio: 21/9), (max-aspect-ratio: 4/5) {
+/* 超宽屏：整幅画面完整呈现，两侧以夜空靛补底
+   （竖屏手机使用 9:16 竖版视频，cover 全屏无缝，无需 contain） */
+@media (min-aspect-ratio: 21/9) {
   .hero-video {
     object-fit: contain;
   }
@@ -721,7 +722,21 @@ body::before {
   margin-bottom: 4px;
   border: 1px solid var(--line);
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.04);
+  background: #ffffff0a;
+}
+
+/* 全局固定横幅：开始新局前/后任何状态都可见 */
+.engine-banner-fixed {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  margin-bottom: 0;
+  background: rgba(13, 17, 32, 0.85);
+  backdrop-filter: blur(6px);
+  border-color: rgba(229, 197, 126, 0.4);
+  white-space: nowrap;
 }
 
 .engine-progress {

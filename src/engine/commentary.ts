@@ -148,17 +148,46 @@ export function describeLastMoveParts(
   }
 
   // 作用判定（按优先级取第一个命中）
+  // 顺序：提 → 打 → 扳 → 粘 → 接 → 长 → 断 → 几何（尖/跳/飞/拆）
   let reason = ''
   if (res.captured.length > 0) {
     reason = res.captured.length > 1 ? `提${res.captured.length}子` : '提'
   } else if (atariAfter) {
     reason = '打'
-  } else if (ownAdj.size >= 2) {
-    reason = '接'
-  } else if (preOwnAtari.size > 0 && own.libs >= 2) {
-    reason = '长'
-  } else if (enemyAdj.size >= 2) {
-    reason = '断'
+  } else {
+    // 扳：落点两侧共线地「己方一侧、敌方一侧」——挡住对方往此方向的头
+    let ban = false
+    const orthAt = (x: number, y: number): number => {
+      if (x < 0 || y < 0 || x >= size || y >= size) return -1
+      return at(x, y)
+    }
+    const px = last.x
+    const py = last.y
+    const pairs: Array<[readonly [number, number], readonly [number, number]]> = [
+      [[1, 0], [-1, 0]],
+      [[0, 1], [0, -1]],
+    ]
+    for (const [d1, d2] of pairs) {
+      const ca = orthAt(px + d1[0], py + d1[1])
+      const cb = orthAt(px + d2[0], py + d2[1])
+      const enemy = last.player === BLACK ? WHITE : BLACK
+      if ((ca === last.player && cb === enemy) || (ca === enemy && cb === last.player)) {
+        ban = true
+        break
+      }
+    }
+    if (ban) {
+      reason = '扳'
+    } else if (enemyAdj.size >= 1 && ownAdj.size >= 1) {
+      // 粘：贴着对方棋子把己方棋连接回去
+      reason = '粘'
+    } else if (ownAdj.size >= 2) {
+      reason = '接'
+    } else if (preOwnAtari.size > 0 && own.libs >= 2) {
+      reason = '长'
+    } else if (enemyAdj.size >= 2) {
+      reason = '断'
+    }
   }
 
   // 点名（开局阶段、孤立着点）
@@ -187,8 +216,12 @@ export function describeLastMoveParts(
       const ax = Math.abs(bx)
       const ay = Math.abs(by)
       if (bd === 1 && ax === 1 && ay === 1) reason = '尖'
-      else if (bd === 2 && ((ax === 2 && ay === 0) || (ax === 0 && ay === 2))) reason = '跳'
-      else if (bd === 2 && ax === 1 && ay === 1) reason = '小飞'
+      else if (bd === 2 && ((ax === 2 && ay === 0) || (ax === 0 && ay === 2))) {
+        // 二间直线：沿边线为拆二（横向拆看行号、纵向拆看列号），中腹为跳
+        const onLine = (v: number): boolean => v === 2 || v === 3 || v === size - 3 || v === size - 4
+        const nearSide = (ax === 2 && onLine(last.y)) || (ay === 2 && onLine(last.x))
+        reason = nearSide ? '拆二' : '跳'
+      } else if (bd === 2 && ax === 1 && ay === 1) reason = '小飞'
       else if (bd === 3 && ((ax === 3 && ay === 0) || (ax === 0 && ay === 3))) reason = '拆三'
       else if (bd === 3 && ax === 2 && ay === 1) reason = '大飞'
     }

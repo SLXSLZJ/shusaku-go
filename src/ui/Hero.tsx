@@ -8,15 +8,28 @@ import { useEffect, useRef, useState } from 'react'
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const heroRef = useRef<HTMLDivElement | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const [videoSrc, setVideoSrc] = useState('/assets/hero-desktop.mp4')
 
-  // 移动端换低码率视频
+  // 视频源：竖屏（手机）用 9:16 竖版裁剪；横屏窄窗用低码率版；默认桌面版
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 860px)')
-    const update = (): void => setIsMobile(mq.matches)
+    const update = (): void => {
+      const portrait = window.matchMedia('(orientation: portrait)').matches
+      const narrow = window.matchMedia('(max-width: 860px)').matches
+      setVideoSrc(
+        portrait
+          ? '/assets/hero-vertical.mp4'
+          : narrow
+            ? '/assets/hero-mobile.mp4'
+            : '/assets/hero-desktop.mp4',
+      )
+    }
     update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
+    window.addEventListener('resize', update)
+    window.addEventListener('orientationchange', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('orientationchange', update)
+    }
   }, [])
 
   // 滚动渐变：现代浏览器用 CSS scroll timeline（见 styles.css）；
@@ -43,8 +56,8 @@ export function Hero() {
         <video
           ref={videoRef}
           className="hero-video"
-          src={isMobile ? '/assets/hero-mobile.mp4' : '/assets/hero-desktop.mp4'}
-          poster="/assets/hero-poster.jpg"
+          src={videoSrc}
+          poster={videoSrc === '/assets/hero-vertical.mp4' ? '/assets/hero-vertical-poster.jpg' : '/assets/hero-poster.jpg'}
           autoPlay
           muted
           loop

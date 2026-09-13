@@ -5,6 +5,7 @@ import { writeFileSync } from 'node:fs'
 const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 const URL = process.argv[2] ?? 'http://localhost:5173/'
 const OUT = process.argv[3] ?? 'C:/Users/NewUser/AppData/Local/Temp/hero-shot.png'
+const SIZE = (process.argv[4] ?? '1400,900').split(',').map((n) => parseInt(n, 10))
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const proc = spawn(
@@ -15,7 +16,7 @@ const proc = spawn(
     '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-hero-shot-' + Date.now(),
     '--disable-http-cache',
     '--no-first-run',
-    '--window-size=1400,900',
+    `--window-size=${SIZE[0]},${SIZE[1]}`,
     URL,
   ],
   { stdio: 'ignore' },

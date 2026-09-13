@@ -35,4 +35,32 @@ describe('describeLastMove', () => {
     const r = describeLastMove(9, moves, 0)
     expect(r).toContain('虚着')
   })
+
+  it('扳描述（己方与敌方分列落点两侧共线）', () => {
+    // 黑(3,4) 为己方，白(5,4) 为敌方头，黑(4,4) 落下挡住 → 扳
+    const moves = [B(3, 4), W(5, 4), W(7, 7), B(7, 6), B(4, 4)]
+    const r = describeLastMove(9, moves, 0)
+    expect(r).toContain('扳')
+  })
+
+  it('粘描述（贴着敌子把己方棋连回）', () => {
+    // 黑(4,3) 与白(3,4) 相邻交错；黑(3,3) 落下：贴白(3,4) 且与黑(4,3) 连接 → 粘
+    const moves = [B(4, 3), W(3, 4), W(6, 6), B(3, 3)]
+    const r = describeLastMove(9, moves, 0)
+    expect(r).toContain('粘')
+  })
+
+  it('拆二描述（三线沿边二间）', () => {
+    // 黑(2,6)（三线），黑(4,6) 为三线二间 → 拆二
+    const moves = [B(2, 6), W(5, 5), B(4, 6)]
+    const r = describeLastMove(9, moves, 0)
+    expect(r).toContain('拆二')
+  })
+
+  it('中腹二间仍为跳', () => {
+    // 黑(3,4)，黑(5,4)（中腹二间直线）→ 跳
+    const moves = [B(3, 4), W(6, 6), B(5, 4)]
+    const r = describeLastMove(9, moves, 0)
+    expect(r).toContain('跳')
+  })
 })
