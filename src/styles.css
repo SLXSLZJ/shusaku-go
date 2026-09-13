@@ -703,6 +703,15 @@ body::before {
   flex: none;
 }
 
+/* 形势判断目差文字 */
+.territory-lead {
+  flex: none;
+  font-size: 13.5px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-align: center;
+}
+
 .announce-slot {
   height: 46px;
   flex: none;
@@ -762,8 +771,8 @@ body::before {
   font-size: 18px;
   letter-spacing: 0.14em;
   color: var(--paper);
-  background: rgba(13, 17, 32, 0.85);
-  border: 1px solid var(--line);
+  background: rgba(229, 197, 126, 0.08);
+  border: 1px solid var(--gold);
   border-radius: 2px;
   padding: 5px 20px;
   white-space: nowrap;

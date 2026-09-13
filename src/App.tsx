@@ -78,6 +78,7 @@ export default function App() {
   const [announceKey, setAnnounceKey] = useState(0)
   const [territoryOn, setTerritoryOn] = useState(false)
   const [territory, setTerritory] = useState<number[] | null>(null)
+  const [territoryLead, setTerritoryLead] = useState<string | null>(null)
   const territoryReqRef = useRef(0)
 
   const aiPlayerNum: 0 | 1 | 2 = applied.aiSide === 'black' ? BLACK : applied.aiSide === 'white' ? WHITE : 0
@@ -261,10 +262,13 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snap])
 
-  // ── 形势判断：开启时用小型评估取势力图，随每手刷新 ──
+  // ── 形势判断：开启时用小型评估取势力图与目差，随每手刷新 ──
   useEffect(() => {
     if (!territoryOn || snap.isOver || thinking || scoring) {
-      if (!territoryOn) setTerritory(null)
+      if (!territoryOn) {
+        setTerritory(null)
+        setTerritoryLead(null)
+      }
       return
     }
     const req = ++territoryReqRef.current
@@ -272,7 +276,17 @@ export default function App() {
     getBackend()
       .then((b) => b.evaluate(positionFromGame(), { visits: 96, maxTimeMs: 3000, pickMode: 'best' }))
       .then((res) => {
-        if (alive && req === territoryReqRef.current) setTerritory(res.ownership)
+        if (!alive || req !== territoryReqRef.current) return
+        setTerritory(res.ownership)
+        // 目差（黑为正）取 0.5 步进：KataGo 目差估算的常规精度
+        const lead = Math.round(res.scoreLead * 2) / 2
+        setTerritoryLead(
+          Math.abs(lead) < 0.5
+            ? '双方接近均势'
+            : lead > 0
+              ? `黑方领先约 ${lead} 目`
+              : `白方领先约 ${-lead} 目`,
+        )
       })
       .catch(() => {})
     return () => {
@@ -610,6 +624,11 @@ export default function App() {
             形势判断
           </button>
         </div>
+        {territoryOn && territoryLead && (
+          <div className="territory-lead" role="status">
+            {territoryLead}
+          </div>
+        )}
       </main>
       )}
       </div>
