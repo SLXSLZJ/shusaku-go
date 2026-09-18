@@ -2,7 +2,10 @@
 import { spawn } from 'node:child_process'
 const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-const proc = spawn(EDGE, ['--remote-debugging-port=9780','--headless=new','--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-perf2-'+Date.now(),'--disable-http-cache','--proxy-bypass-list=<-loopback>','--no-first-run','http://localhost:5173/'], { stdio: 'ignore' })
+const proc = spawn(EDGE, ['--remote-debugging-port=9780','--headless=new','--mute-audio','--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-perf2-'+Date.now(),'--disable-http-cache','--proxy-bypass-list=<-loopback>','--no-first-run','http://localhost:5173/'], { stdio: 'ignore' })
+
+;process.on('exit', () => { try { proc.kill() } catch {} })
+process.on('uncaughtException', () => { try { proc.kill() } catch {}; process.exit(1) })
 for (let i=0;i<30;i++){ try { await fetch('http://127.0.0.1:9780/json/version'); break } catch {} await sleep(500) }
 let target
 for (let i=0;i<20;i++){ const r = await fetch('http://127.0.0.1:9780/json'); const l = await r.json(); target = l.find(t=>t.type==='page'); if(target) break; await sleep(500) }

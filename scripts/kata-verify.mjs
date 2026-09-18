@@ -18,6 +18,8 @@ function spawnEdgeOnPort(port) {
   const args = [
     '--remote-debugging-port=' + port,
     '--headless=new',
+    // 无头实例静音：避免残留进程播放页面背景音乐
+    '--mute-audio',
     '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-kata-verify-' + Date.now() + '-' + port,
     '--disable-http-cache',
     '--disable-features=BackForwardCache',
@@ -31,7 +33,16 @@ function spawnEdgeOnPort(port) {
   if (process.env.CDP_PROXY) args.splice(1, 0, '--proxy-server=' + process.env.CDP_PROXY)
   // 系统代理（如 FlClash）开着时也不能拦截 localhost 请求
   args.splice(1, 0, '--proxy-bypass-list=<-loopback>')
-  return spawn(EDGE, args, { stdio: 'ignore' })
+  const proc = spawn(EDGE, args, { stdio: 'ignore' })
+  // 脚本异常退出也保证杀掉无头浏览器，不留僵尸进程/背景音乐
+  process.on('exit', () => {
+    try { proc.kill() } catch {}
+  })
+  process.on('uncaughtException', () => {
+    try { proc.kill() } catch {}
+    process.exit(1)
+  })
+  return proc
 }
 
 async function cdpReady(port) {

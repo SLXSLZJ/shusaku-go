@@ -12,7 +12,7 @@ const proc = spawn(
   EDGE,
   [
     '--remote-debugging-port=9527',
-    '--headless=new',
+    '--headless=new','--mute-audio',
     '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-hero-shot-' + Date.now(),
     '--disable-http-cache',
     '--no-first-run',
@@ -21,6 +21,9 @@ const proc = spawn(
   ],
   { stdio: 'ignore' },
 )
+
+;process.on('exit', () => { try { proc.kill() } catch {} })
+process.on('uncaughtException', () => { try { proc.kill() } catch {}; process.exit(1) })
 
 let port = null
 for (let i = 0; i < 30; i++) {

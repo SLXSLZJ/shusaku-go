@@ -26,13 +26,15 @@ outer: for (const p of [9223, 9224, 9333, 9527, 9789]) {
   } catch {}
 }
 if (!port) throw new Error('所有候选端口的 CDP 均未就绪')
+;process.on('exit', () => { try { proc?.kill() } catch {} })
+process.on('uncaughtException', () => { try { proc?.kill() } catch {}; process.exit(1) })
 
 function spawnEdgeOnPort(p) {
   return spawn(
     EDGE,
     [
       '--remote-debugging-port=' + p,
-      '--headless=new',
+      '--headless=new','--mute-audio',
       '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-kata-diag-' + Date.now() + '-' + p,
       '--disable-http-cache',
       '--disable-features=BackForwardCache',
