@@ -39,6 +39,10 @@ let backendPromise: Promise<void> | null = null;
 let backendPreference: KataGoBackendPreference | null = null;
 let prodModeEnabled = false;
 let queue: Promise<void> = Promise.resolve();
+/** 人味策略 logits 缓存（键：humanKey|positionKey），LRU 上限 8 局面 */
+const humanLogitsCache = new Map<string, Float32Array>();
+/** 已完成内核预热的棋盘尺寸（换尺寸后第一访的 JIT 尖峰消除） */
+let lastWarmedSize = 0;
 
 let V7_SPATIAL_STRIDE = BOARD_AREA * 22;
 const V7_GLOBAL_STRIDE = 19;
@@ -508,6 +512,23 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
     await ensureModel(msg.modelUrl, msg.backend);
     if (!model) throw new Error('Model not loaded');
     ensureBoardSizeForWorker(msg.board.length);
+    if (lastWarmedSize !== BOARD_SIZE) {
+      // 新棋盘尺寸的首批 TF 内核需要 JIT：零输入跑一次价值头预热，
+      // 消除该尺寸第一手搜索的尖峰（~数百毫秒）
+      lastWarmedSize = BOARD_SIZE;
+      try {
+        const wSpatial = tf.zeros([1, BOARD_SIZE, BOARD_SIZE, 22], 'float32') as tf.Tensor4D;
+        const wGlobal = tf.zeros([1, 19], 'float32') as tf.Tensor2D;
+        const wOut = model.forwardValueOnly(wSpatial, wGlobal);
+        await Promise.allSettled([wOut.value.data(), wOut.scoreValue.data()]);
+        wSpatial.dispose();
+        wGlobal.dispose();
+        wOut.value.dispose();
+        wOut.scoreValue.dispose();
+      } catch {
+        // 预热失败不影响后续正式搜索
+      }
+    }
     const boardSize = BOARD_SIZE;
 
     const conservativePass = msg.conservativePass !== false;
@@ -676,7 +697,7 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
 
     const maxVisits = Math.max(16, Math.min(msg.visits ?? 256, ENGINE_MAX_VISITS));
     const maxTimeMs = Math.max(25, Math.min(msg.maxTimeMs ?? 800, ENGINE_MAX_TIME_MS));
-    const batchSize = Math.max(1, Math.min(msg.batchSize ?? (tf.getBackend() === 'webgpu' ? 16 : 4), 64));
+    const batchSize = Math.max(1, Math.min(msg.batchSize ?? (tf.getBackend() === 'webgpu' ? 16 : 8), 64));
     const maxChildren = Math.max(4, Math.min(msg.maxChildren ?? 64, BOARD_AREA));
     const topK = Math.max(1, Math.min(msg.topK ?? 10, 50));
     const includeMovesOwnership = msg.includeMovesOwnership === true;
@@ -751,25 +772,37 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
     // The human policy is about the position, not the search, so it is computed up
     // front: its favourite moves are added to the root so the report says what they
     // are worth, and the same numbers are reported alongside the analysis.
+    // 结果按 humanKey+positionKey 缓存：搜索树复用命中时不再重算人味网前向。
     let humanLogits: Float32Array | null = null;
     let humanPolicyError: string | undefined;
     if (msg.humanModelUrl && msg.humanSlProfile) {
-      try {
-        humanLogits = await computeHumanPolicyLogits({
-          modelUrl: msg.humanModelUrl,
-          profile: msg.humanSlProfile,
-          board: msg.board,
-          previousBoard: msg.previousBoard,
-          previousPreviousBoard: msg.previousPreviousBoard,
-          currentPlayer: msg.currentPlayer,
-          moveHistory: msg.moveHistory,
-          komi: msg.komi,
-          rules,
-          conservativePass,
-        });
-      } catch (err) {
-        // A missing or broken human net must not take the real analysis down with it.
-        humanPolicyError = err instanceof Error ? err.message : String(err);
+      const cacheKey = `${humanKey}|${msg.positionKey ?? msg.positionId ?? ''}`;
+      const cached = humanLogitsCache.get(cacheKey);
+      if (cached) {
+        humanLogits = cached;
+      } else {
+        try {
+          humanLogits = await computeHumanPolicyLogits({
+            modelUrl: msg.humanModelUrl,
+            profile: msg.humanSlProfile,
+            board: msg.board,
+            previousBoard: msg.previousBoard,
+            previousPreviousBoard: msg.previousPreviousBoard,
+            currentPlayer: msg.currentPlayer,
+            moveHistory: msg.moveHistory,
+            komi: msg.komi,
+            rules,
+            conservativePass,
+          });
+          humanLogitsCache.set(cacheKey, humanLogits);
+          if (humanLogitsCache.size > 8) {
+            const oldest = humanLogitsCache.keys().next().value;
+            if (oldest !== undefined) humanLogitsCache.delete(oldest);
+          }
+        } catch (err) {
+          // A missing or broken human net must not take the real analysis down with it.
+          humanPolicyError = err instanceof Error ? err.message : String(err);
+        }
       }
     }
     const humanMovePriors = humanLogits ? softmaxOverBoard(humanLogits) : null;
@@ -964,14 +997,79 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
       });
 
     if (!shouldReport) {
-      const aborted = await search!.run({ visits: maxVisits, maxTimeMs, batchSize, shouldAbort });
-      if (aborted || shouldAbort()) {
-        postCanceled();
-        if (msg.reuseTree !== true) {
-          search = null;
-          searchKey = null;
+      const deadline0 = getAnimationNow() + maxTimeMs;
+      // 高访问量档（认真度高档）走时间片收敛循环：每 800ms 检查一次，
+      // 最佳点连续两轮稳定且胜率波动极小时提前落子；低档单次搜满
+      let converged = false;
+      if (maxVisits >= 2000) {
+        const deadline2 = getAnimationNow() + maxTimeMs;
+        let slices = 0;
+        let prevBest: string | null = null;
+        let prevWr = NaN;
+        while (true) {
+          if (shouldAbort()) {
+            postCanceled();
+            if (msg.reuseTree !== true) {
+              search = null;
+              searchKey = null;
+            }
+            return;
+          }
+          const remainingMs = deadline2 - getAnimationNow();
+          if (remainingMs <= 0) break;
+          const aborted = await search!.run({
+            visits: maxVisits,
+            maxTimeMs: Math.min(800, remainingMs),
+            batchSize,
+            shouldAbort,
+          });
+          if (aborted || shouldAbort()) {
+            postCanceled();
+            if (msg.reuseTree !== true) {
+              search = null;
+              searchKey = null;
+            }
+            return;
+          }
+          slices++;
+          const snapAnalysis0 = search!.getAnalysis({
+            topK: 1,
+            includeMovesOwnership: false,
+            analysisPvLen: 0,
+            cloneBuffers: false,
+            ownershipRefreshIntervalMs: 1e9,
+          });
+          if (snapAnalysis0.rootVisits >= maxVisits) break;
+          // 轻量快照：只看最佳点稳定性（不做 ownership/PV 的完整构建）
+          const snapAnalysis = snapAnalysis0;
+          const best = snapAnalysis.moves.find((m) => m.order === 0) ?? snapAnalysis.moves[0];
+          if (!best) break;
+          const bestKey = best.x < 0 || best.y < 0 ? 'pass' : `${best.x},${best.y}`;
+          if (
+            slices >= 3 &&
+            snapAnalysis0.rootVisits >= maxVisits * 0.25 &&
+            getAnimationNow() - (deadline2 - maxTimeMs) >= 1200 &&
+            prevBest === bestKey &&
+            Math.abs(snapAnalysis.rootWinRate - prevWr) < 0.005
+          ) {
+            converged = true;
+            break;
+          }
+          prevBest = bestKey;
+          prevWr = snapAnalysis.rootWinRate;
         }
-        return;
+      }
+      if (!converged) {
+        const remainingMs = Math.max(0, maxTimeMs - (getAnimationNow() - (deadline0 ?? getAnimationNow())));
+        const aborted = await search!.run({ visits: maxVisits, maxTimeMs: remainingMs, batchSize, shouldAbort });
+        if (aborted || shouldAbort()) {
+          postCanceled();
+          if (msg.reuseTree !== true) {
+            search = null;
+            searchKey = null;
+          }
+          return;
+        }
       }
       postAnalysis(buildAnalysis(), 'katago:analyze_result');
       if (msg.reuseTree !== true) {

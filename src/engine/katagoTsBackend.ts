@@ -95,12 +95,37 @@ interface AnalyzeOutcome {
 /** 推理后端偏好：WebGPU 优先；对局中途故障则永久降级 WASM（本会话内） */
 let backendPref: 'webgpu' | 'wasm' = 'webgpu'
 
+/** 低配设备（少核/低内存）自动降档：换更快应答，强度封顶 */
+const lowEndDevice = (() => {
+  try {
+    const nav = navigator as { hardwareConcurrency?: number; deviceMemory?: number };
+    const cores = nav.hardwareConcurrency ?? 8
+    const mem = nav.deviceMemory ?? 8
+    return cores <= 4 || mem <= 4
+  } catch {
+    return false
+  }
+})()
+
+/** 访问量随棋盘尺寸缩放：小棋盘分支数少，同档位等效棋力所需搜索量更低 */
+const SIZE_FACTOR: Record<number, number> = { 9: 0.35, 13: 0.55, 19: 1 }
+
 async function analyzePosition(
   position: GamePosition,
   settings: EngineSettings,
   ownershipMode: 'none' | 'root' | 'tree',
   group: 'interactive' | 'background' = 'interactive',
 ): Promise<AnalyzeOutcome> {
+  // 尺寸缩放 + 低配降档
+  const factor = SIZE_FACTOR[position.size] ?? 1
+  let visits = Math.max(32, Math.round(settings.visits * factor))
+  let maxTimeMs = Math.max(800, Math.round(settings.maxTimeMs * Math.max(factor, 0.4)))
+  if (lowEndDevice) {
+    visits = Math.min(visits, 1500)
+    maxTimeMs = Math.min(maxTimeMs, 8000)
+  }
+  const scaled: EngineSettings = { ...settings, visits, maxTimeMs }
+
   const attempt = async (): Promise<AnalyzeOutcome> => {
     const { boards, currentPlayer, kMoves } = replayBoards(position)
     const humanSl = settings.humanSl
@@ -108,6 +133,7 @@ async function analyzePosition(
       analysisGroup: group,
       positionId: `p${position.moves.length}`,
       parentPositionId: position.moves.length > 0 ? `p${position.moves.length - 1}` : undefined,
+      positionKey: position.moves.map((m) => (m.x < 0 ? 'pass' : `${m.x}${m.y}`)).join(';'),
       modelUrl: KATAGO_MODEL_URL,
       backend: backendPref,
       board: boards[boards.length - 1]!,
@@ -117,8 +143,8 @@ async function analyzePosition(
       moveHistory: kMoves,
       komi: position.komi,
       rules: toKRules(position.rules),
-      visits: settings.visits,
-      maxTimeMs: settings.maxTimeMs,
+      visits: scaled.visits,
+      maxTimeMs: scaled.maxTimeMs,
       ownershipMode,
       reuseTree: true,
       humanModelUrl: humanSl ? KATAGO_HUMAN_MODEL_URL : undefined,

@@ -274,7 +274,7 @@ export default function App() {
     const req = ++territoryReqRef.current
     let alive = true
     getBackend()
-      .then((b) => b.evaluate(positionFromGame(), { visits: 96, maxTimeMs: 3000, pickMode: 'best' }))
+      .then((b) => b.evaluate(positionFromGame(), { visits: 64, maxTimeMs: 3000, pickMode: 'best' }))
       .then((res) => {
         if (!alive || req !== territoryReqRef.current) return
         setTerritory(res.ownership)

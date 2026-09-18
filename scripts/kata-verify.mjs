@@ -29,6 +29,8 @@ function spawnEdgeOnPort(port) {
     URL,
   ]
   if (process.env.CDP_PROXY) args.splice(1, 0, '--proxy-server=' + process.env.CDP_PROXY)
+  // 系统代理（如 FlClash）开着时也不能拦截 localhost 请求
+  args.splice(1, 0, '--proxy-bypass-list=<-loopback>')
   return spawn(EDGE, args, { stdio: 'ignore' })
 }
 
@@ -142,8 +144,17 @@ for (let i = 0; i < 90; i++) {
 console.log('引擎:', engine || '(未就绪)')
 
 // Hero 占首屏 + 开始前隐藏棋盘：滚到对局区、点「开始新局」、展开棋谱
+// 可用 FORCE_STRENGTH=10 环境变量把认真度设到 10（全力），测提前落子
 await evalJs('document.querySelector(".game-section")?.scrollIntoView({ behavior: "instant" })')
 await sleep(600)
+if (process.env.FORCE_STRENGTH) {
+  const r2 = await evalJs(
+    `(() => { const i = document.querySelector(".range"); if (!i) return "no-range"; const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set; set.call(i, ${process.env.FORCE_STRENGTH}); i.dispatchEvent(new Event("input", { bubbles: true })); i.dispatchEvent(new Event("change", { bubbles: true })); return "ok" })()`,
+  )
+  console.log('设置认真度:', process.env.FORCE_STRENGTH, r2)
+  await sleep(300)
+}
+const clickT0 = Date.now()
 const clickStart = await evalJs(
   '(() => { const b = [...document.querySelectorAll(".btn")].find((x) => x.textContent === "开始新局"); if (!b) return "no-btn"; b.click(); return "clicked" })()',
 )
@@ -176,11 +187,16 @@ if (dims.top < 0 || dims.top > 900) {
 }
 // AI 执黑时先等 AI 的自动首手，再在空点落白子（逐个偏移试）
 let moveBefore = -1
+let firstMoveMs = -1
 for (const off of [0, 0.18, -0.18, 0.3]) {
   for (let i = 0; i < 30; i++) {
     const s = await evalJs('document.querySelectorAll(".log li").length')
-    if (s !== null && s > moveBefore) { moveBefore = s; break }
-    await sleep(1000)
+    if (s !== null && s > moveBefore) {
+      if (moveBefore === 0 && s >= 1 && firstMoveMs < 0) firstMoveMs = Date.now() - clickT0
+      moveBefore = s
+      break
+    }
+    await sleep(500)
   }
   const d2 = await evalJs(
     '(() => { const c = document.querySelector(".board-canvas"); const r = c.getBoundingClientRect(); const off = ' + off + ' * r.width; return { x: r.x + r.width / 2 + off, y: r.y + r.height / 2 - off * 0.6 } })()',
@@ -192,6 +208,7 @@ for (const off of [0, 0.18, -0.18, 0.3]) {
   console.log(`落子尝试(offset=${off}): 手数 ${moveBefore} → ${now}`)
   if (now !== null && now >= moveBefore + 1) break
 }
+if (firstMoveMs >= 0) console.log(`AI 首手耗时(从点击开始新局算起): ${firstMoveMs}ms`)
 console.log('已落黑子于棋盘中心，等待 AI 应答……')
 
 // 等 AI 应答（手数 ≥ 2），最多 4 分钟
