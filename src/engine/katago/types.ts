@@ -244,11 +244,20 @@ export interface KataGoNotice {
   message: string;
 }
 
+/** Worker 从队列取出该分析时回执 dequeue（初始化阶段开始）；
+ *  真正开搜前回执 search（搜索阶段开始）。主线程看门狗据此分阶段计时。 */
+export interface KataGoAnalyzeAck {
+  type: 'katago:analyze_ack';
+  id: number;
+  phase: 'dequeue' | 'search';
+}
+
 export type KataGoWorkerResponse =
   | KataGoNotice
   | KataGoProgress
   | KataGoWarmHumanResponse
   | KataGoInitResponse
+  | KataGoAnalyzeAck
   | KataGoAnalyzeUpdate
   | KataGoAnalyzeResponse
   | KataGoEvalResponse

@@ -661,6 +661,9 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
   }
 
   if (msg.type === 'katago:analyze') {
+    // 出队即回执：主线程的看门狗以此刻为「初始化阶段」起点（模型/预热/人味网前向），
+    // 「搜索阶段」回执在真正开搜前发出；排队（如人味网预热）不计时
+    post({ type: 'katago:analyze_ack', id: msg.id, phase: 'dequeue' });
     const meta = analyzeMeta.get(msg);
     const analysisGroup = meta?.analysisGroup ?? msg.analysisGroup ?? 'background';
     const interactiveTokenAtEnqueue = meta?.interactiveToken ?? interactiveToken;
@@ -997,6 +1000,9 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
       });
 
     if (!shouldReport) {
+      // 所有前置工作（模型初始化/换尺寸预热/人味网前向）已就绪，即将开搜：
+      // 主线程看门狗据此切换到「预算+宽限」阶段
+      post({ type: 'katago:analyze_ack', id: msg.id, phase: 'search' });
       const deadline0 = getAnimationNow() + maxTimeMs;
       // 高访问量档（认真度高档）走时间片收敛循环：每 800ms 检查一次，
       // 最佳点连续两轮稳定且胜率波动极小时提前落子；低档单次搜满
@@ -1079,6 +1085,10 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
       return;
     }
 
+    // 上面的非报告路径未走时（报告模式），同样在开搜前发出 search 阶段回执
+    if (shouldReport) {
+      post({ type: 'katago:analyze_ack', id: msg.id, phase: 'search' });
+    }
     const deadline = getAnimationNow() + maxTimeMs;
     let lastReportVisits = -1;
     while (true) {

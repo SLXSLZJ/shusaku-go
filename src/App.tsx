@@ -5,7 +5,7 @@ import { computeScore, deadStonesFromOwnership, type ScoreDetail } from './core/
 import { BLACK, WHITE, type BoardSize, type PlayError, type Point } from './core/types'
 import { describeLastMoveParts, type MoveAnnounce } from './engine/commentary'
 import { getEngineBackend, type EngineBackend, type EngineProgress } from './engine/engineFacade'
-import { warmHumanModel } from './engine/katagoTsBackend'
+import { warmHumanModel, katagoBackendLabel } from './engine/katagoTsBackend'
 import { playStoneSound } from './sound/stoneSound'
 import type { GamePosition } from './engine/protocol'
 import { strengthLevel } from './engine/strength'
@@ -76,6 +76,8 @@ export default function App() {
   const [logOpen, setLogOpen] = useState(false)
   const [announce, setAnnounce] = useState<MoveAnnounce | null>(null)
   const [announceKey, setAnnounceKey] = useState(0)
+  /** AI 上一手的耗时遥测（用时/访问量/后端），便于实测校准各档位 */
+  const [aiTelemetry, setAiTelemetry] = useState<string | null>(null)
   const [territoryOn, setTerritoryOn] = useState(false)
   const [territory, setTerritory] = useState<number[] | null>(null)
   const [territoryLead, setTerritoryLead] = useState<string | null>(null)
@@ -206,6 +208,7 @@ export default function App() {
             setAnnounceKey((k) => k + 1)
           }
           if (g.isOver) return
+          setAiTelemetry(`AI 用时 ${(res.timeMs / 1000).toFixed(1)} 秒 · ${res.visits} 访问 · ${katagoBackendLabel()}`)
           const aiWinrate = aiPlayerNum === BLACK ? res.blackWinrate : 1 - res.blackWinrate
           lowStreakRef.current = aiWinrate < 0.08 ? lowStreakRef.current + 1 : 0
           if (res.move.kind === 'resign' || lowStreakRef.current >= 2) {
@@ -237,7 +240,11 @@ export default function App() {
     }, 80)
     return () => {
       window.clearTimeout(timer)
-      if (!fired) thinkingRef.current = false
+      if (!fired) {
+        // 定时器被 snap 快速变化清除时，恢复状态行（否则会永久卡在「思考中」）
+        thinkingRef.current = false
+        setThinking(false)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snap])
@@ -364,6 +371,7 @@ export default function App() {
     setResignSide(null)
     setSetupOpen(false)
     setAnnounce(null)
+    setAiTelemetry(null)
     setGameStarted(true)
     scoringRequestedRef.current = false
     lowStreakRef.current = 0
@@ -449,7 +457,9 @@ export default function App() {
             <span className={`stone-dot ${snap.turn === BLACK ? 'black' : 'white'}`} aria-hidden />
             <span>
               {engineProgress && engineProgress.stage !== 'ready'
-                ? 'AI 引擎准备中，首手稍久……'
+                ? engineProgress.stage === 'human'
+                  ? '正在准备秀策棋风网络（首手前一次性加载）……'
+                  : 'AI 引擎准备中，首手稍久……'
                 : snap.isOver
                   ? '终局'
                   : thinking
@@ -460,9 +470,8 @@ export default function App() {
             </span>
             <span className="dim">第 {snap.moveNumber} 手</span>
           </div>
-          <div className="state-row dim">
-            黑提 {snap.captures.black} · 白提 {snap.captures.white}
-          </div>
+          <div className="state-row dim">黑提 {snap.captures.black} · 白提 {snap.captures.white}</div>
+          {aiTelemetry && !thinking && <div className="state-row dim">{aiTelemetry}</div>}
           <AnimatePresence>
             {snap.isOver && snap.overReason === 'resign' && (
               <motion.div

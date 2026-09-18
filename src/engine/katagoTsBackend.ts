@@ -14,7 +14,7 @@ import type { BoardState, GameRules, Move as KMove, Player as KPlayer } from '..
 import { publicUrl } from '../utils/publicUrl'
 import type { BenchmarkResult, GenMoveResult } from './engineClient'
 import type { EngineMove, EngineSettings, GamePosition, PositionResult } from './protocol'
-import { getKataGoEngineClient } from './katago/client'
+import { getKataGoEngineClient, resetKataGoEngineClient } from './katago/client'
 import {
   blendHumanChosenMove,
   chooseIndexWithTemperature,
@@ -29,8 +29,6 @@ export const KATAGO_MODEL_URL = publicUrl('models/kata1-b18c384nbt-s9996604416-d
 /** 人味 SL 网：按段位/年代预测人类着法（policy 专用，价值仍来自主力网）。 */
 export const KATAGO_HUMAN_MODEL_URL = publicUrl('models/b18c384nbt-humanv0.bin.gz')
 export const KATAGO_MODEL_NAME = 'KataGo'
-
-const client = getKataGoEngineClient()
 
 function toKPlayer(player: number): KPlayer {
   return player === BLACK ? 'black' : 'white'
@@ -126,10 +124,10 @@ async function analyzePosition(
   }
   const scaled: EngineSettings = { ...settings, visits, maxTimeMs }
 
-  const attempt = async (): Promise<AnalyzeOutcome> => {
+  const attempt = (budgetMs: number, onAck: (phase: 'dequeue' | 'search') => void): Promise<AnalyzeOutcome> => {
     const { boards, currentPlayer, kMoves } = replayBoards(position)
     const humanSl = settings.humanSl
-    const analysis = await client.analyze({
+    const analysis = getKataGoEngineClient().analyze({
       analysisGroup: group,
       positionId: `p${position.moves.length}`,
       parentPositionId: position.moves.length > 0 ? `p${position.moves.length - 1}` : undefined,
@@ -144,14 +142,18 @@ async function analyzePosition(
       komi: position.komi,
       rules: toKRules(position.rules),
       visits: scaled.visits,
-      maxTimeMs: scaled.maxTimeMs,
+      maxTimeMs: budgetMs,
       ownershipMode,
       reuseTree: true,
       humanModelUrl: humanSl ? KATAGO_HUMAN_MODEL_URL : undefined,
       humanSlProfile: humanSl?.profile,
       humanSlRootExploreProb: humanSl ? humanBotPresets[humanSl.style].rootExploreProbWeightless : undefined,
+      onStart: (phase) => {
+        if (phase === 'search' && startedAt === 0) startedAt = Date.now()
+        onAck(phase)
+      },
     })
-    return {
+    return analysis.then((analysis) => ({
       blackWinrate: analysis.rootWinRate,
       scoreLead: analysis.rootScoreLead,
       ownership: Array.from(analysis.ownership),
@@ -168,15 +170,88 @@ async function analyzePosition(
         humanPrior: m.humanPrior,
         utility: m.utility,
       })),
-    }
+    }))
   }
+
+  /**
+   * 带看门狗的尝试，分三个阶段计时（挂起的推理无法从内部中断——批次内的
+   * mapAsync await 不会返回，shouldAbort 没有机会执行——只能销毁重建 Worker）：
+   * - 出队前：可能排在人味网预热等任务后面，用宽裕的排队上限；
+   * - 出队后→开搜前：初始化阶段（Worker 重建时要解析 93MB 模型、换尺寸预热、
+   *   人味网前向），同样远超预算，不能用预算计时；
+   * - 开搜后：预算 + 宽限（覆盖搜索收尾与 ownership 构建）。
+   */
+  const attemptWithWatchdog = (budgetMs: number): Promise<AnalyzeOutcome> =>
+    new Promise((resolve, reject) => {
+      let settled = false
+      let timer: ReturnType<typeof setTimeout> | null = null
+      const arm = (ms: number, cause: string) => {
+        if (timer) clearTimeout(timer)
+        timer = setTimeout(() => {
+          if (settled) return
+          settled = true
+          reject(new Error(`watchdog: ${cause}`))
+        }, ms)
+      }
+      const finish = (fn: () => void) => {
+        if (settled) return
+        settled = true
+        if (timer) clearTimeout(timer)
+        fn()
+      }
+      arm(QUEUE_LIMIT_MS, `请求排队 ${Math.round(QUEUE_LIMIT_MS / 1000)}s 未见 Worker 出队（疑似挂起）`)
+      attempt(budgetMs, (phase: 'dequeue' | 'search') => {
+        if (phase === 'dequeue') {
+          arm(INIT_LIMIT_MS, `初始化 ${Math.round(INIT_LIMIT_MS / 1000)}s 未完成（疑似挂起）`)
+        } else {
+          const graceMs = Math.max(10_000, Math.round(budgetMs * 0.5))
+          arm(budgetMs + graceMs, `搜索 ${Math.round((budgetMs + graceMs) / 1000)}s 无响应（疑似挂起）`)
+        }
+      }).then(
+        (outcome) => finish(() => resolve(outcome)),
+        (err) => finish(() => reject(err instanceof Error ? err : new Error(String(err)))),
+      )
+    })
+
   const settle = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+  // 整手棋共享时间预算：时钟从「开搜回执」（Worker 真正开始搜索）起算，
+  // 重试按剩余预算分配——否则 WebGPU 尝试烧满预算后失败、WASM 重试又拿
+  // 全新预算，一手棋要等两份时间。下限 25% 预算，保证降级后仍能给出可用的选点。
+  const QUEUE_LIMIT_MS = 240_000
+  const INIT_LIMIT_MS = 120_000
+  let startedAt = 0
+  let watchdogRetries = 0
   // WebGPU 对局中途故障（设备重置/缓冲区失败）→ 永久降级 WASM；
-  // WASM 偶发失败也给予有限重试，总共最多 3 次尝试
+  // WASM 偶发失败也给予有限重试
   for (let attemptNo = 1; ; attemptNo++) {
+    const budgetMs =
+      startedAt === 0
+        ? scaled.maxTimeMs
+        : Math.max(
+            Math.round(scaled.maxTimeMs * 0.25),
+            800,
+            Math.min(scaled.maxTimeMs, scaled.maxTimeMs - (Date.now() - startedAt)),
+          )
     try {
-      return await attempt()
+      return await attemptWithWatchdog(budgetMs)
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.startsWith('watchdog:')) {
+        // 第二次挂起：放弃正常搜索，用极小预算做最后一搏（出一步快棋也比报错好）
+        if (watchdogRetries >= 2) throw err
+        watchdogRetries++
+        backendPref = 'wasm'
+        startedAt = 0
+        resetKataGoEngineClient()
+        const tiny = watchdogRetries >= 2
+        if (tiny) {
+          scaled.visits = Math.min(scaled.visits, 256)
+          scaled.maxTimeMs = Math.min(scaled.maxTimeMs, 4000)
+        }
+        console.warn(`[katago] ${msg}；销毁重建 Worker${tiny ? '，以极小预算做最后一次尝试' : '，以 WASM 重试'}`)
+        await settle(300)
+        continue
+      }
       if (backendPref === 'webgpu') {
         backendPref = 'wasm'
         console.warn('[katago] WebGPU 推理失败，已降级 WASM 并重试：', err)
@@ -187,6 +262,15 @@ async function analyzePosition(
       console.warn(`[katago] 推理失败（第 ${attemptNo} 次），重试：`, err)
       await settle(300)
     }
+  }
+}
+
+/** 最近一次分析实际使用的推理后端（webgpu / wasm），用于对局遥测显示。 */
+export function katagoBackendLabel(): string {
+  try {
+    return getKataGoEngineClient().getEngineInfo().backend ?? '未知'
+  } catch {
+    return '未知'
   }
 }
 
@@ -245,7 +329,7 @@ export async function isKatagoTsReady(
   onProgress?: (received: number, total: number) => void,
 ): Promise<boolean> {
   try {
-    const init = client.init(KATAGO_MODEL_URL, 'webgpu', onProgress)
+    const init = getKataGoEngineClient().init(KATAGO_MODEL_URL, 'webgpu', onProgress)
     let timer: ReturnType<typeof setTimeout> | null = null
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new Error('KataGo 初始化超时')), timeoutMs)
@@ -265,7 +349,7 @@ export async function isKatagoTsReady(
 export function warmHumanModel(
   onProgress?: (received: number, total: number) => void,
 ): Promise<boolean> {
-  return client
+  return getKataGoEngineClient()
     .warmHuman(KATAGO_HUMAN_MODEL_URL, onProgress)
     .then(() => true)
     .catch(() => false)

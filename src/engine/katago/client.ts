@@ -34,7 +34,12 @@ class KataGoEngineClient {
   private pendingWarm = new Map<number, { resolve: () => void; reject: (e: Error) => void }>();
   private pending = new Map<
     number,
-    { resolve: (a: Analysis) => void; reject: (e: Error) => void; onProgress?: (a: Analysis) => void }
+    {
+      resolve: (a: Analysis) => void;
+      reject: (e: Error) => void;
+      onProgress?: (a: Analysis) => void;
+      onStart?: (phase: 'dequeue' | 'search') => void;
+    }
   >();
   private pendingEval = new Map<number, { resolve: (e: EvalResult) => void; reject: (e: Error) => void }>();
   private pendingEvalBatch = new Map<number, { resolve: (e: EvalBatchResult) => void; reject: (e: Error) => void }>();
@@ -93,6 +98,11 @@ class KataGoEngineClient {
         }
         if (!msg.ok) pendingInit.reject(new Error(msg.error ?? 'Init failed'));
         else pendingInit.resolve();
+        return;
+      }
+      if (msg.type === 'katago:analyze_ack') {
+        // Worker 已出队（dequeue）/ 即将开搜（search）：调用方据此分阶段收紧看门狗
+        this.pending.get(msg.id)?.onStart?.(msg.phase);
         return;
       }
       if (msg.type === 'katago:analyze_update') {
@@ -320,6 +330,8 @@ class KataGoEngineClient {
     avoidMoves?: Array<{ x: number; y: number; player?: Player; untilDepth?: number }>;
     allowMoves?: Array<{ moves: Array<{ x: number; y: number }>; player?: Player; untilDepth?: number }>;
     onProgress?: (analysis: Analysis) => void;
+    /** Worker 出队（dequeue）与开搜（search）时各触发一次，用于看门狗分阶段计时。 */
+    onStart?: (phase: 'dequeue' | 'search') => void;
   }): Promise<Analysis> {
     this.rejectIfCrashed();
     const id = this.nextId++;
@@ -366,7 +378,7 @@ class KataGoEngineClient {
       allowMoves: args.allowMoves,
     };
     const promise = new Promise<Analysis>((resolve, reject) => {
-      this.pending.set(id, { resolve, reject, onProgress: args.onProgress });
+      this.pending.set(id, { resolve, reject, onProgress: args.onProgress, onStart: args.onStart });
     });
     try {
       this.postToWorker(req);
@@ -472,6 +484,12 @@ function formatWorkerError(err: unknown, prefix: string): Error {
 export function getKataGoEngineClient(): KataGoEngineClient {
   if (!singleton) singleton = new KataGoEngineClient();
   return singleton;
+}
+
+/** 销毁当前 Worker 并清空单例：下一次 getKataGoEngineClient() 会重建全新实例。
+ *  用于看门狗判定推理挂起后的强制恢复（新 Worker 将按降级后的后端初始化）。 */
+export function resetKataGoEngineClient(): void {
+  resetKataGoEngineClientForTests();
 }
 
 export function resetKataGoEngineClientForTests(): void {
