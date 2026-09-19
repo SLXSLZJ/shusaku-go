@@ -10,12 +10,19 @@
 </style>
 </head>
 <body>
-<h1>WebGPU 适配器诊断（在出现挂起的那个 Edge 窗口里打开本页）</h1>
+<h1>WebGPU / WASM 环境诊断（在出现卡慢的那个 Edge 窗口里打开本页）</h1>
 <div id="out"></div>
 <script type="module">
 const out = document.getElementById('out')
 const log = (s) => out.append(Object.assign(document.createElement('pre'), { textContent: s }))
 try {
+  // —— 跨源隔离 / SAB / wasm 线程能力：决定 WASM 能否多线程 ——
+  log(JSON.stringify({
+    crossOriginIsolated,
+    SharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
+    cores: navigator.hardwareConcurrency,
+    deviceMemory: navigator.deviceMemory ?? '(未知)',
+  }, null, 2))
   if (!navigator.gpu) { log('此浏览器上下文没有 navigator.gpu'); throw new Error('stop') }
   for (const pref of ['high-performance', 'low-power', undefined]) {
     const adapter = await navigator.gpu.requestAdapter(pref ? { powerPreference: pref } : {})
