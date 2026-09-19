@@ -108,6 +108,9 @@ const lowEndDevice = (() => {
 /** 访问量随棋盘尺寸缩放：小棋盘分支数少，同档位等效棋力所需搜索量更低 */
 const SIZE_FACTOR: Record<number, number> = { 9: 0.35, 13: 0.55, 19: 1 }
 
+/** 各棋盘尺寸实测搜索速度（访问量/秒，指数滑动平均）——时间优先自适应的依据 */
+const vpsBySize = new Map<number, number>()
+
 async function analyzePosition(
   position: GamePosition,
   settings: EngineSettings,
@@ -124,7 +127,11 @@ async function analyzePosition(
   }
   const scaled: EngineSettings = { ...settings, visits, maxTimeMs }
 
-  const attempt = (budgetMs: number, onAck: (phase: 'dequeue' | 'search') => void): Promise<AnalyzeOutcome> => {
+  const attempt = (
+    budgetMs: number,
+    visits: number,
+    onAck: (phase: 'dequeue' | 'search') => void,
+  ): Promise<AnalyzeOutcome> => {
     const { boards, currentPlayer, kMoves } = replayBoards(position)
     const humanSl = settings.humanSl
     const analysis = getKataGoEngineClient().analyze({
@@ -141,7 +148,7 @@ async function analyzePosition(
       moveHistory: kMoves,
       komi: position.komi,
       rules: toKRules(position.rules),
-      visits: scaled.visits,
+      visits,
       maxTimeMs: budgetMs,
       ownershipMode,
       reuseTree: true,
@@ -181,7 +188,7 @@ async function analyzePosition(
    *   人味网前向），同样远超预算，不能用预算计时；
    * - 开搜后：预算 + 宽限（覆盖搜索收尾与 ownership 构建）。
    */
-  const attemptWithWatchdog = (budgetMs: number): Promise<AnalyzeOutcome> =>
+  const attemptWithWatchdog = (budgetMs: number, visits: number): Promise<AnalyzeOutcome> =>
     new Promise((resolve, reject) => {
       let settled = false
       let timer: ReturnType<typeof setTimeout> | null = null
@@ -200,7 +207,7 @@ async function analyzePosition(
         fn()
       }
       arm(QUEUE_LIMIT_MS, `请求排队 ${Math.round(QUEUE_LIMIT_MS / 1000)}s 未见 Worker 出队（疑似挂起）`)
-      attempt(budgetMs, (phase: 'dequeue' | 'search') => {
+      attempt(budgetMs, visits, (phase: 'dequeue' | 'search') => {
         if (phase === 'dequeue') {
           arm(INIT_LIMIT_MS, `初始化 ${Math.round(INIT_LIMIT_MS / 1000)}s 未完成（疑似挂起）`)
         } else {
@@ -219,6 +226,14 @@ async function analyzePosition(
   // 全新预算，一手棋要等两份时间。下限 25% 预算，保证降级后仍能给出可用的选点。
   const QUEUE_LIMIT_MS = 240_000
   const INIT_LIMIT_MS = 120_000
+  // 时间优先自适应：档位承诺的是「思考时间」而非访问量。按棋盘尺寸记录
+  // 实测搜索速度（访问量/秒，指数滑动平均），速度不足时把访问量收缩到
+  // 时间预算的 75% 以内——慢机器上档位棋力打折，但一手棋不再动辄半分钟。
+  const vpsEma = vpsBySize.get(position.size) ?? null
+  const targetSeconds = (scaled.maxTimeMs / 1000) * 0.75
+  let effectiveVisits = vpsEma
+    ? Math.max(32, Math.min(scaled.visits, Math.round(vpsEma * targetSeconds)))
+    : scaled.visits
   let startedAt = 0
   let watchdogRetries = 0
   // WebGPU 对局中途故障（设备重置/缓冲区失败）→ 永久降级 WASM；
@@ -233,7 +248,17 @@ async function analyzePosition(
             Math.min(scaled.maxTimeMs, scaled.maxTimeMs - (Date.now() - startedAt)),
           )
     try {
-      return await attemptWithWatchdog(budgetMs)
+      const outcome = await attemptWithWatchdog(budgetMs, effectiveVisits)
+      // 用这一手的实测速度更新自适应基准（搜索阶段时长，不含排队与初始化）
+      if (startedAt > 0) {
+        const searchMs = Date.now() - startedAt
+        if (searchMs > 250 && outcome.visits > 0) {
+          const sample = outcome.visits / (searchMs / 1000)
+          const prev = vpsBySize.get(position.size)
+          vpsBySize.set(position.size, prev ? prev * 0.5 + sample * 0.5 : sample)
+        }
+      }
+      return outcome
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       if (msg.startsWith('watchdog:')) {
@@ -250,7 +275,7 @@ async function analyzePosition(
         }
         startedAt = 0
         if (tiny) {
-          scaled.visits = Math.min(scaled.visits, 256)
+          effectiveVisits = Math.min(effectiveVisits, 256)
           scaled.maxTimeMs = Math.min(scaled.maxTimeMs, 4000)
         }
         console.warn(
