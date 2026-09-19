@@ -130,6 +130,21 @@ function ensureBoardSizeForWorker(boardSize: number): void {
 let backendNote: string | null = null;
 let postedBackendNote: string | null = null;
 
+/**
+ * 真实生效的推理后端（而非请求偏好）：wasm 会标注线程形态。
+ * 「wasm 单线程」慢数倍是正常的；若远低于此，遥测能立刻暴露配置问题。
+ */
+function describeTfBackend(): string {
+  const name = tf.getBackend();
+  if (name !== 'wasm') return name;
+  try {
+    const threaded = tf.env().getBool('WASM_MULTI_THREADED');
+    return threaded ? 'wasm多线程' : 'wasm单线程';
+  } catch {
+    return 'wasm';
+  }
+}
+
 function postBackendNote(): void {
   if (!backendNote || backendNote === postedBackendNote) return;
   postedBackendNote = backendNote;
@@ -158,40 +173,47 @@ function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> 
 }
 
 async function initWasmBackend(): Promise<void> {
-  try {
-    // Vite serves `public/` at the site root.
-    setWasmPaths(publicUrl('tfjs/'));
-    // Use a reasonable thread count for XNNPACK when cross-origin isolated (SharedArrayBuffer).
-    // Without COOP/COEP headers, browsers disable threads and TFJS will fall back to single-threaded wasm.
-    const isCrossOriginIsolated = (globalThis as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true;
-    // 无头浏览器（CI/无头验证）里嵌套线程 Worker 会挂起——保持单线程
-    const isHeadless = navigator.userAgent.includes('HeadlessChrome');
-    if (isCrossOriginIsolated && !isHeadless) {
-      // Cores minus headroom for the UI, held down further on a machine short
-      // of memory. See utils/workerThreads for why memory is only trusted
-      // below 4GB.
-      setThreadsCount(detectSearchThreadCount());
-    }
-    // setBackend resolves false, without throwing, when the backend fails to
-    // initialise; the old bare await treated that as success. 线程 Worker 万一
-    // 挂起也不能卡死引擎：限时 20s，超时走 CPU 兜底。
-    await withTimeout(
-      (async () => {
-        if (!(await tf.setBackend('wasm'))) throw new Error('tf.setBackend(\'wasm\') returned false');
-        await tf.ready();
-      })(),
-      20_000,
-      'wasm backend init timed out',
-    );
-    return;
-  } catch (err) {
-    backendNote = [backendNote, `WASM backend failed (${describeError(err)}); using the CPU backend`]
-      .filter(Boolean)
-      .join('. ');
-  }
+  setWasmPaths(publicUrl('tfjs/'));
+  // Use a reasonable thread count for XNNPACK when cross-origin isolated (SharedArrayBuffer).
+  // Without COOP/COEP headers, browsers disable threads and TFJS will fall back to single-threaded wasm.
+  const isCrossOriginIsolated = (globalThis as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true;
+  // 无头浏览器（CI/无头验证）里嵌套线程 Worker 会挂起——保持单线程
+  const isHeadless = navigator.userAgent.includes('HeadlessChrome');
+  const wantThreads = isCrossOriginIsolated && !isHeadless;
+  // 线程化初始化失败/超时后，退回单线程再试一次（无嵌套 Worker，健壮得多）。
+  // 绝不退到纯 JS 的 CPU 后端：它跑 b18 慢数百倍（实测 86 秒只搜出 18 个访问点），
+  // 比「这手棋报错、交给上层重试」糟糕得多。
+  const attempts: Array<{ threads: boolean; timeoutMs: number }> = [];
+  if (wantThreads) attempts.push({ threads: true, timeoutMs: 20_000 });
+  attempts.push({ threads: false, timeoutMs: 30_000 });
 
-  await tf.setBackend('cpu');
-  await tf.ready();
+  let lastErr: unknown = null;
+  for (const attempt of attempts) {
+    try {
+      setThreadsCount(attempt.threads ? detectSearchThreadCount() : 1);
+      // setBackend resolves false, without throwing, when the backend fails to
+      // initialise; the old bare await treated that as success. 线程 Worker 万一
+      // 挂起也不能卡死引擎：限时后换下一种形态重试。
+      await withTimeout(
+        (async () => {
+          if (!(await tf.setBackend('wasm'))) throw new Error("tf.setBackend('wasm') returned false");
+          await tf.ready();
+        })(),
+        attempt.timeoutMs,
+        'wasm backend init timed out',
+      );
+      if (!attempt.threads && wantThreads) {
+        backendNote = [backendNote, 'WASM threads failed to start; using single-threaded WASM']
+          .filter(Boolean)
+          .join('. ');
+        postBackendNote();
+      }
+      return;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr ?? new Error('wasm backend init failed');
 }
 
 async function initBackend(preferredBackend: KataGoBackendPreference): Promise<void> {
@@ -485,7 +507,7 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
     post({
       type: 'katago:init_result',
       ok: true,
-      backend: tf.getBackend(),
+      backend: describeTfBackend(),
       modelName: loadedModelName,
     });
     return;
@@ -568,7 +590,7 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
       type: 'katago:eval_result',
       id: msg.id,
       ok: true,
-      backend: tf.getBackend(),
+      backend: describeTfBackend(),
       modelName: loadedModelName,
       eval: {
         rootWinRate: evaled.blackWinProb,
@@ -593,7 +615,7 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
         type: 'katago:eval_batch_result',
         id: msg.id,
         ok: true,
-        backend: tf.getBackend(),
+        backend: describeTfBackend(),
         modelName: loadedModelName,
         evals: [],
       });
@@ -653,7 +675,7 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
       type: 'katago:eval_batch_result',
       id: msg.id,
       ok: true,
-      backend: tf.getBackend(),
+      backend: describeTfBackend(),
       modelName: loadedModelName,
       evals,
     });
@@ -981,7 +1003,7 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
           type,
           id: msg.id,
           ok: true,
-          backend: tf.getBackend(),
+          backend: describeTfBackend(),
           modelName: loadedModelName,
           analysis,
           humanPolicyError,

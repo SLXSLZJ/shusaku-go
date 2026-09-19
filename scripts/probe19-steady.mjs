@@ -5,16 +5,19 @@ const EDGE = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 const SHOT = 'C:/Users/NewUser/AppData/Local/Temp/probe19-steady.png'
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-const staticSrv = spawn('node', ['scripts/preview-coi.mjs', '4173'], { stdio: 'ignore', shell: true })
-for (let i = 0; i < 20; i++) { try { await fetch('http://127.0.0.1:4173/'); break } catch {} await sleep(400) }
+const PORT = process.env.PORT ?? '4173'
+const CDP_PORT = process.env.CDP_PORT ?? '9227'
+const FORCE_LEVEL = process.env.FORCE_LEVEL ?? '7'
+const staticSrv = spawn('node', ['scripts/preview-coi.mjs', PORT], { stdio: 'ignore', shell: true })
+for (let i = 0; i < 20; i++) { try { await fetch('http://127.0.0.1:' + PORT + '/'); break } catch {} await sleep(400) }
 const proc = spawn(EDGE, [
-  '--remote-debugging-port=9227', '--headless=new', '--mute-audio',
+  '--remote-debugging-port=' + CDP_PORT, '--headless=new', '--mute-audio',
   '--user-data-dir=C:/Users/NewUser/AppData/Local/Temp/edge-steady19-' + Date.now(),
   '--disable-http-cache', '--proxy-bypass-list=<-loopback>', '--no-first-run',
   '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows',
   '--disable-renderer-backgrounding', '--disable-hang-monitor',
   '--disable-features=IntensiveWakeUpThrottling',
-  'http://127.0.0.1:4173/',
+  'http://127.0.0.1:' + (process.env.PORT ?? '4173') + '/',
 ], { stdio: 'ignore' })
 // proc.kill() 杀不掉 Edge 的子进程树，会留下占着调试端口的僵尸——用 taskkill 强杀整棵树
 const cleanup = () => {
@@ -25,9 +28,9 @@ process.on('exit', cleanup)
 process.on('uncaughtException', () => { cleanup(); process.exit(1) })
 
 let port = null
-for (let i = 0; i < 30; i++) { try { const r = await fetch('http://127.0.0.1:9227/json/version'); if (r.ok) { port = 9227; break } } catch {} await sleep(500) }
+for (let i = 0; i < 30; i++) { try { const r = await fetch('http://127.0.0.1:' + CDP_PORT + '/json/version'); if (r.ok) { port = CDP_PORT; break } } catch {} await sleep(500) }
 let target
-for (let i = 0; i < 20; i++) { const r = await fetch(`http://127.0.0.1:${port}/json`); const l = await r.json(); target = l.find((t) => t.type === 'page' && t.url.includes('4173')); if (target) break; await sleep(500) }
+for (let i = 0; i < 20; i++) { const r = await fetch(`http://127.0.0.1:${port}/json`); const l = await r.json(); target = l.find((t) => t.type === 'page' && t.url.includes(process.env.PORT ?? '4173')); if (target) break; await sleep(500) }
 const ws = new WebSocket(target.webSocketDebuggerUrl)
 let seq = 0; const pending = new Map()
 let rawHandler = null
@@ -77,7 +80,7 @@ for (let i = 0; i < 180; i++) {
 await evalJs('(() => { if (document.querySelector(".setup-body")) return 1; document.querySelector(".setup-panel .panel-toggle")?.click(); return 2 })()')
 await sleep(300)
 await evalJs(`(() => { const row = [...document.querySelectorAll('.setup-row')].find((r) => r.querySelector('.setup-label')?.textContent === '棋盘'); const btn = [...(row?.querySelectorAll('button') ?? [])].find((b) => b.textContent.includes('十九路')); btn?.click(); return 1 })()`)
-await evalJs(`(() => { const i = document.querySelector('.range'); const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set; set.call(i, '7'); i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); return 1 })()`)
+await evalJs(`(() => { const i = document.querySelector('.range'); const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set; set.call(i, '$FORCE_LEVEL'); i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); return 1 })()`)
 const tStart = Date.now()
 await evalJs('(() => { const b = [...document.querySelectorAll(".btn")].find((x) => x.textContent === "开始新局"); b?.click(); return 1 })()')
 await sleep(500)

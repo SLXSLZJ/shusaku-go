@@ -237,18 +237,25 @@ async function analyzePosition(
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       if (msg.startsWith('watchdog:')) {
-        // 第二次挂起：放弃正常搜索，用极小预算做最后一搏（出一步快棋也比报错好）
         if (watchdogRetries >= 2) throw err
         watchdogRetries++
-        backendPref = 'wasm'
+        // 搜索阶段在 WASM 上超时 = 后端慢而非挂死：重建 Worker 无济于事
+        // （白付 ~20s 重建成本），留在原 Worker 上用小预算快速出招；
+        // WebGPU 挂起或初始化/排队阶段超时才是真挂起，销毁重建并降级 WASM。
+        const slowWasmSearch = backendPref === 'wasm' && msg.includes('搜索')
+        const tiny = slowWasmSearch || watchdogRetries >= 2
+        if (!slowWasmSearch) {
+          backendPref = 'wasm'
+          resetKataGoEngineClient()
+        }
         startedAt = 0
-        resetKataGoEngineClient()
-        const tiny = watchdogRetries >= 2
         if (tiny) {
           scaled.visits = Math.min(scaled.visits, 256)
           scaled.maxTimeMs = Math.min(scaled.maxTimeMs, 4000)
         }
-        console.warn(`[katago] ${msg}；销毁重建 Worker${tiny ? '，以极小预算做最后一次尝试' : '，以 WASM 重试'}`)
+        console.warn(
+          `[katago] ${msg}；${slowWasmSearch ? 'WASM 搜索过慢，原 Worker 小预算出招' : '销毁重建 Worker，以 WASM 重试'}${tiny ? '（极小预算）' : ''}`,
+        )
         await settle(300)
         continue
       }
