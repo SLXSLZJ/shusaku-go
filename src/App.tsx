@@ -5,7 +5,7 @@ import { computeScore, deadStonesFromOwnership, type ScoreDetail } from './core/
 import { BLACK, WHITE, type BoardSize, type PlayError, type Point } from './core/types'
 import { describeLastMoveParts, type MoveAnnounce } from './engine/commentary'
 import { getEngineBackend, type EngineBackend, type EngineProgress } from './engine/engineFacade'
-import { warmHumanModel, katagoBackendLabel } from './engine/katagoTsBackend'
+import { warmHumanModel, katagoBackendLabel, webgpuProbeLabel } from './engine/katagoTsBackend'
 import { playStoneSound } from './sound/stoneSound'
 import type { GamePosition } from './engine/protocol'
 import { strengthLevel } from './engine/strength'
@@ -165,7 +165,10 @@ export default function App() {
       })
       .catch(() => {})
       .finally(() => {
-        if (alive) setEngineProgress(null)
+        if (!alive) return
+        setEngineProgress(null)
+        // 引擎就绪：展示开局 WebGPU 自检结论（未通过时会话已自动切 WASM）
+        setStatus({ kind: 'info', text: webgpuProbeLabel() })
       })
     return () => {
       alive = false

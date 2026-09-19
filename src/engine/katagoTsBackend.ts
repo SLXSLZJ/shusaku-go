@@ -336,13 +336,85 @@ export async function isKatagoTsReady(
     })
     try {
       await Promise.race([init, timeout])
-      return true
     } finally {
       if (timer) clearTimeout(timer)
     }
+    // 初始化成功后立刻做 WebGPU 自检（一次性）：用微型搜索探测后端是否会挂起，
+    // 让不稳定的 WebGPU 在进页面时暴露，而不是在第一手棋里干等看门狗
+    if (backendPref === 'webgpu') {
+      webgpuProbe = (await probeWebgpu()) ? 'ok' : 'failed'
+      if (webgpuProbe === 'failed') {
+        backendPref = 'wasm'
+        resetKataGoEngineClient()
+        console.warn('[katago] WebGPU 开局自检失败（挂起/报错），本次会话改用 WASM，并在后台重建引擎')
+        // 后台按 WASM 重建引擎（模型解析约 10~30s，藏在加载横幅期间），避免首手等待
+        void getKataGoEngineClient()
+          .init(KATAGO_MODEL_URL, 'wasm')
+          .catch(() => {})
+      }
+    }
+    return true
   } catch {
     return false
   }
+}
+
+/** WebGPU 自检结果（每次页面加载最多一次）。 */
+let webgpuProbe: 'skipped' | 'ok' | 'failed' = 'skipped'
+
+/** 自检结论的展示文案（App 在引擎就绪后展示）。 */
+export function webgpuProbeLabel(): string {
+  if (webgpuProbe === 'ok') return 'WebGPU 自检通过'
+  if (webgpuProbe === 'failed') return 'WebGPU 自检未通过，本次对局使用 WASM 稳定模式'
+  return '引擎就绪'
+}
+
+/** 微型搜索自检：走真实的 analyze 链路（网络前向 + MCTS + mapAsync），15s 无结果即判失败。 */
+async function probeWebgpu(): Promise<boolean> {
+  const { boards, currentPlayer, kMoves } = replayBoards({
+    size: 19,
+    moves: [],
+    handicapStones: 0,
+    komi: 6.5,
+    rules: 'chinese',
+    superko: true,
+  })
+  return new Promise<boolean>((resolve) => {
+    let settled = false
+    const finish = (ok: boolean) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      resolve(ok)
+    }
+    const timer = setTimeout(() => finish(false), 15_000)
+    getKataGoEngineClient()
+      .analyze({
+        analysisGroup: 'background',
+        positionId: 'probe',
+        positionKey: 'probe',
+        modelUrl: KATAGO_MODEL_URL,
+        backend: 'webgpu',
+        board: boards[boards.length - 1]!,
+        currentPlayer,
+        moveHistory: kMoves,
+        komi: 6.5,
+        rules: 'chinese',
+        visits: 32,
+        maxTimeMs: 2000,
+        ownershipMode: 'none',
+        reuseTree: false,
+        topK: 1,
+        analysisPvLen: 0,
+      })
+      .then(
+        () => finish(true),
+        (err) => {
+          console.warn('[katago] WebGPU 自检搜索报错：', err)
+          finish(false)
+        },
+      )
+  })
 }
 
 /** 后台预热人味 SL 网（秀策流棋风专用）：主网就绪后调用，不阻塞对弈。 */
