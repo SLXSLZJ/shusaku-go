@@ -30,6 +30,16 @@ export const KATAGO_MODEL_URL = publicUrl('models/kata1-b18c384nbt-s9996604416-d
 export const KATAGO_HUMAN_MODEL_URL = publicUrl('models/b18c384nbt-humanv0.bin.gz')
 export const KATAGO_MODEL_NAME = 'KataGo'
 
+/** URL ?threads=N：强制 WASM 搜索线程数上限（诊断 / 实验；缺省 4） */
+const threadsParam: number | undefined = (() => {
+  try {
+    const n = Number(new URLSearchParams(self.location.search).get('threads'))
+    return Number.isFinite(n) && n >= 1 ? Math.floor(n) : undefined
+  } catch {
+    return undefined
+  }
+})()
+
 function toKPlayer(player: number): KPlayer {
   return player === BLACK ? 'black' : 'white'
 }
@@ -159,6 +169,7 @@ async function analyzePosition(
         if (phase === 'search' && startedAt === 0) startedAt = Date.now()
         onAck(phase)
       },
+      threadsCap: threadsParam,
     })
     return analysis.then((analysis) => ({
       blackWinrate: analysis.rootWinRate,
@@ -361,7 +372,7 @@ export async function isKatagoTsReady(
   onProgress?: (received: number, total: number) => void,
 ): Promise<boolean> {
   try {
-    const init = getKataGoEngineClient().init(KATAGO_MODEL_URL, 'webgpu', onProgress)
+    const init = getKataGoEngineClient().init(KATAGO_MODEL_URL, 'webgpu', onProgress, threadsParam)
     let timer: ReturnType<typeof setTimeout> | null = null
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new Error('KataGo 初始化超时')), timeoutMs)

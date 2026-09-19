@@ -37,6 +37,8 @@ let humanModel: KataGoModelV8Tf | null = null;
 let loadedHumanModelUrl: string | null = null;
 let backendPromise: Promise<void> | null = null;
 let backendPreference: KataGoBackendPreference | null = null;
+/** WASM 搜索线程数上限（主线程经 init/analyze 消息下发；缺省 4） */
+let threadsCap: number | null = null;
 let prodModeEnabled = false;
 let queue: Promise<void> = Promise.resolve();
 /** 人味策略 logits 缓存（键：humanKey|positionKey），LRU 上限 8 局面 */
@@ -191,7 +193,10 @@ async function initWasmBackend(): Promise<void> {
   const isCrossOriginIsolated = (globalThis as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true;
   // 无头浏览器（CI/无头验证）里嵌套线程 Worker 会挂起——保持单线程
   const isHeadless = navigator.userAgent.includes('HeadlessChrome');
-  const wantThreads = isCrossOriginIsolated && !isHeadless;
+  // 线程数上限：默认 4。XNNPACK 线程自旋等待，超过 4 个后收益微弱，
+  // 而在远程会话/串流主机的 CPU 争抢下大线程数反而会互相踩踏导致速度崩溃。
+  const cap = Math.max(1, Math.min(threadsCap ?? 4, 4));
+  const wantThreads = isCrossOriginIsolated && !isHeadless && cap > 1;
   // 线程化初始化失败/超时后，退回单线程再试一次（无嵌套 Worker，健壮得多）。
   // 绝不退到纯 JS 的 CPU 后端：它跑 b18 慢数百倍（实测 86 秒只搜出 18 个访问点），
   // 比「这手棋报错、交给上层重试」糟糕得多。
@@ -202,7 +207,7 @@ async function initWasmBackend(): Promise<void> {
   let lastErr: unknown = null;
   for (const attempt of attempts) {
     try {
-      setThreadsCount(attempt.threads ? detectSearchThreadCount() : 1);
+      setThreadsCount(attempt.threads ? Math.min(detectSearchThreadCount(), cap) : 1);
       // setBackend resolves false, without throwing, when the backend fails to
       // initialise; the old bare await treated that as success. 线程 Worker 万一
       // 挂起也不能卡死引擎：限时后换下一种形态重试。
@@ -513,6 +518,7 @@ function post(msg: KataGoWorkerResponse, transfer?: Transferable[]) {
 
 async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
   if (msg.type === 'katago:init') {
+    if (typeof msg.threadsCap === 'number') threadsCap = msg.threadsCap;
     await ensureModel(msg.modelUrl, msg.backend, (received, total) =>
       post({ type: 'katago:progress', stage: 'main', received, total }),
     );
@@ -698,6 +704,7 @@ async function handleMessage(msg: KataGoWorkerRequest): Promise<void> {
     // 出队即回执：主线程的看门狗以此刻为「初始化阶段」起点（模型/预热/人味网前向），
     // 「搜索阶段」回执在真正开搜前发出；排队（如人味网预热）不计时
     post({ type: 'katago:analyze_ack', id: msg.id, phase: 'dequeue' });
+    if (typeof msg.threadsCap === 'number') threadsCap = msg.threadsCap;
     const meta = analyzeMeta.get(msg);
     const analysisGroup = meta?.analysisGroup ?? msg.analysisGroup ?? 'background';
     const interactiveTokenAtEnqueue = meta?.interactiveToken ?? interactiveToken;

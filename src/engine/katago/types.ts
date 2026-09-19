@@ -4,6 +4,8 @@ export interface KataGoInitRequest {
   type: 'katago:init';
   modelUrl: string;
   backend?: KataGoBackendPreference;
+  /** WASM 搜索线程数上限（页面的 ?threads=N 覆盖；缺省 4） */
+  threadsCap?: number;
 }
 
 /** 主网 / 人味网模型下载进度（无 id 的广播消息）。 */
@@ -40,6 +42,8 @@ export interface KataGoAnalyzeRequest {
   type: 'katago:analyze';
   id: number;
   analysisGroup?: 'interactive' | 'background';
+  /** WASM 搜索线程数上限（页面的 ?threads=N 覆盖；缺省 4） */
+  threadsCap?: number;
   positionId?: string;
   parentPositionId?: string;
   positionKey?: string;

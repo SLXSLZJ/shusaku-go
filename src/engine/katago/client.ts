@@ -246,6 +246,7 @@ class KataGoEngineClient {
     modelUrl: string,
     backend?: KataGoBackendPreference,
     onProgress?: (received: number, total: number) => void,
+    threadsCap?: number,
   ): Promise<void> {
     if (this.pendingInit) return this.pendingInit.promise;
     if (this.crashed) return Promise.reject(this.crashed);
@@ -257,7 +258,7 @@ class KataGoEngineClient {
       reject = rej;
     });
     this.pendingInit = { promise, resolve, reject };
-    const initMsg: KataGoWorkerRequest = { type: 'katago:init', modelUrl, backend };
+    const initMsg: KataGoWorkerRequest = { type: 'katago:init', modelUrl, backend, threadsCap };
     try {
       this.postToWorker(initMsg);
     } catch (err) {
@@ -332,6 +333,8 @@ class KataGoEngineClient {
     onProgress?: (analysis: Analysis) => void;
     /** Worker 出队（dequeue）与开搜（search）时各触发一次，用于看门狗分阶段计时。 */
     onStart?: (phase: 'dequeue' | 'search') => void;
+    /** WASM 搜索线程数上限（页面的 ?threads=N 覆盖；缺省 4）。 */
+    threadsCap?: number;
   }): Promise<Analysis> {
     this.rejectIfCrashed();
     const id = this.nextId++;
@@ -339,6 +342,7 @@ class KataGoEngineClient {
       type: 'katago:analyze',
       id,
       analysisGroup: args.analysisGroup,
+      threadsCap: args.threadsCap,
       positionId: args.positionId,
       parentPositionId: args.parentPositionId,
       positionKey: args.positionKey,
