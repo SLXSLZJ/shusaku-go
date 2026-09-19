@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>WebGPU 适配器诊断</title>
+<style>
+  body { font-family: Consolas, monospace; background: #101426; color: #d8dcf0; padding: 24px; }
+  pre { white-space: pre-wrap; background: #1a2040; padding: 12px; border-radius: 8px; }
+  h1 { font-size: 18px; }
+</style>
+</head>
+<body>
+<h1>WebGPU 适配器诊断（在出现挂起的那个 Edge 窗口里打开本页）</h1>
+<div id="out"></div>
+<script type="module">
+const out = document.getElementById('out')
+const log = (s) => out.append(Object.assign(document.createElement('pre'), { textContent: s }))
+try {
+  if (!navigator.gpu) { log('此浏览器上下文没有 navigator.gpu'); throw new Error('stop') }
+  for (const pref of ['high-performance', 'low-power', undefined]) {
+    const adapter = await navigator.gpu.requestAdapter(pref ? { powerPreference: pref } : {})
+    if (!adapter) { log(`powerPreference=${pref ?? '默认'}: 未取得适配器`); continue }
+    let info = adapter.info
+    if (!info && adapter.requestAdapterInfo) info = await adapter.requestAdapterInfo()
+    log(`powerPreference=${pref ?? '默认'}\n` + JSON.stringify(
+      { vendor: info?.vendor, architecture: info?.architecture, device: info?.device, description: info?.description, isFallbackAdapter: adapter.isFallbackAdapter },
+      null, 2))
+    if (pref === 'high-performance') {
+      const dev = await adapter.requestDevice()
+      dev.lost.then((e) => log(`!! GPU 设备丢失: ${e.reason} — ${e.message}`))
+      dev.addEventListener?.('uncapturederror', (e) => log('!! 未捕获 GPU 错误: ' + e.error.message))
+      const t0 = performance.now()
+      try {
+        // 与游戏同款负载级别的小型冒烟测试：反复提交并映射缓冲区
+        for (let i = 0; i < 20; i++) {
+          const buf = dev.createBuffer({ size: 256, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ })
+          dev.queue.writeBuffer(buf, 0, new Float32Array(64).fill(i))
+          await buf.mapAsync(GPUMapMode.READ)
+          buf.unmap(); buf.destroy()
+        }
+        log(`冒烟测试通过：20 次 mapAsync 用时 ${Math.round(performance.now() - t0)}ms（页面保持打开可监测设备丢失）`)
+      } catch (e) {
+        log('!! 冒烟测试失败: ' + (e?.message ?? e))
+      }
+    }
+  }
+} catch (e) { if (e.message !== 'stop') log('诊断出错: ' + (e?.message ?? e)) }
+</script>
+</body>
+</html>
