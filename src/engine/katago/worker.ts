@@ -145,8 +145,8 @@ function describeTfBackend(): string {
         return null; // 该旗标在此 TFJS 版本不存在
       }
     };
-    const mt = flag('WASM_HAS_MULTITHREAD') ?? flag('WASM_MULTI_THREADED');
-    const simd = flag('WASM_HAS_SIMD');
+    const mt = flag('WASM_HAS_MULTITHREAD_SUPPORT');
+    const simd = flag('WASM_HAS_SIMD_SUPPORT');
     if (mt === null && simd === null) return 'wasm';
     const parts: string[] = ['wasm'];
     parts.push(mt === true ? '多线程' : mt === false ? '单线程' : '线程?');
