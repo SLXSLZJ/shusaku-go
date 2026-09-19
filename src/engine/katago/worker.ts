@@ -131,15 +131,27 @@ let backendNote: string | null = null;
 let postedBackendNote: string | null = null;
 
 /**
- * 真实生效的推理后端（而非请求偏好）：wasm 会标注线程形态。
- * 「wasm 单线程」慢数倍是正常的；若远低于此，遥测能立刻暴露配置问题。
+ * 真实生效的推理后端（而非请求偏好）：wasm 会标注二进制形态（多线程/SIMD）。
+ * TFJS 按特性检测挑 .wasm 变体，加载失败会静默落到慢速变体——这里把真相亮出来。
  */
 function describeTfBackend(): string {
   const name = tf.getBackend();
   if (name !== 'wasm') return name;
   try {
-    const threaded = tf.env().getBool('WASM_MULTI_THREADED');
-    return threaded ? 'wasm多线程' : 'wasm单线程';
+    const flag = (f: string): boolean | null => {
+      try {
+        return tf.env().getBool(f);
+      } catch {
+        return null; // 该旗标在此 TFJS 版本不存在
+      }
+    };
+    const mt = flag('WASM_HAS_MULTITHREAD') ?? flag('WASM_MULTI_THREADED');
+    const simd = flag('WASM_HAS_SIMD');
+    if (mt === null && simd === null) return 'wasm';
+    const parts: string[] = ['wasm'];
+    parts.push(mt === true ? '多线程' : mt === false ? '单线程' : '线程?');
+    if (simd === false) parts.push('无SIMD');
+    return parts.join('·');
   } catch {
     return 'wasm';
   }

@@ -392,7 +392,7 @@ export default function App() {
       .then((b) => b.benchmark(draft.size, playouts))
       .then((r) =>
         setBenchText(
-          `${SIZE_LABEL[draft.size]} 引擎测速（${engineName ?? '引擎'}）：约 ${Math.round(r.playoutsPerSecond).toLocaleString()} 访问量/秒`,
+          `${SIZE_LABEL[draft.size]} 引擎测速（${engineName ?? '引擎'} · ${katagoBackendLabel()}）：约 ${Math.round(r.playoutsPerSecond).toLocaleString()} 访问量/秒`,
         ),
       )
       .catch((e) => setBenchText(`测速失败：${String(e)}`))
