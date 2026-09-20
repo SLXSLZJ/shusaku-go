@@ -80,9 +80,11 @@ async function main() {
   }
 
   mkdirSync(TFJS_DIR, { recursive: true })
+  // FORCE_TFJS=1 强制重取（例如修复了 worker 解包逻辑后需要覆盖坏文件）
+  const forceTfjs = process.env.FORCE_TFJS === '1'
   for (const m of TFJS_FILES) {
     const dest = path.join(TFJS_DIR, m.file)
-    if (existsSync(dest) && statSync(dest).size > 10_000) {
+    if (!forceTfjs && existsSync(dest) && statSync(dest).size > 10_000) {
       console.log(`已存在，跳过：tfjs/${m.file}`)
       continue
     }
@@ -95,16 +97,21 @@ async function main() {
       continue
     }
     // npm 包里 wasm-out 的 worker 文件是 Node 包装（module.exports.wasmWorkerContents
-    // = `..."`，反引号模板串），浏览器不能直接 importScripts——解出内层纯 JS 再落盘
+    // = `..."`，反引号模板串），浏览器不能直接 importScripts——解出内层纯 JS 再落盘。
+    // 必须用「切片」而不是执行求值：new Function 会把源码里的 \n 转义解码成真实换行，
+    // 产出语法错误的 worker（字符串未闭合），pthread 线程创建失败 → WASM 多线程静默失效。
     if (m.file.endsWith('.worker.js')) {
-      const wrapped = readFileSync(dest, 'utf8')
+      const wrapped = readFileSync(dest, 'utf8').trim()
       if (!wrapped.startsWith('module.exports.wasmWorkerContents')) {
         throw new Error(`worker 文件格式异常：${m.file}`)
       }
-      const mod = { exports: {} }
-      new Function('module', `${wrapped}; return module.exports.wasmWorkerContents;`)(mod)
-      const raw = mod.exports.wasmWorkerContents
-      if (typeof raw !== 'string' || raw.length < 1000) throw new Error(`worker 解包失败：${m.file}`)
+      const prefix = 'module.exports.wasmWorkerContents = `'
+      if (!wrapped.startsWith(prefix) || !wrapped.endsWith('`;')) {
+        throw new Error(`worker 包装格式异常：${m.file}`)
+      }
+      const raw = wrapped.slice(prefix.length, wrapped.length - 2)
+      if (raw.includes('\n')) throw new Error(`worker 解包异常（含真实换行）：${m.file}`)
+      new Function(raw) // 仅编译校验：内层必须是语法合法的 JS
       writeFileSync(dest, raw)
       console.log(` 完成（解包 ${Math.round(statSync(dest).size / 1e3)}KB）`)
     } else {
