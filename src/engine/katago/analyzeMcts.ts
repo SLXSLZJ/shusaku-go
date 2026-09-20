@@ -4035,7 +4035,9 @@ export class MctsSearch {
 
     const deadline = getAnimationNow() + maxTimeMs;
     let timeCheckCounter = 0;
-    const timeCheckMask = 0x1f;
+    // 每 4 次模拟查一次钟（原为 32）：慢后端（如远程会话里 ~3 访问/秒的 WASM）上
+    // 32 次模拟要 10 秒以上，12 秒预算会实际跑出 20 秒；查钟本身开销可忽略
+    const timeCheckMask = 0x03;
     const timeExceeded = (): boolean => {
       if ((timeCheckCounter++ & timeCheckMask) !== 0) return false;
       return getAnimationNow() >= deadline;

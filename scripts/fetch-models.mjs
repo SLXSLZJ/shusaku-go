@@ -10,7 +10,10 @@ import path from 'node:path'
 
 const OUT_DIR = path.resolve('public/models')
 const TFJS_DIR = path.resolve('public/tfjs')
-const TFJS_VERSION = '4.22.0'
+// 版本跟随已安装的包（避免 JS 与 wasm 二进制错位）；CI 与本地一致
+const TFJS_VERSION = JSON.parse(
+  readFileSync(path.resolve('node_modules/@tensorflow/tfjs-backend-wasm/package.json'), 'utf8'),
+).version
 const TFJS_PKG = `https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm@${TFJS_VERSION}`
 const MODELS = [
   {
