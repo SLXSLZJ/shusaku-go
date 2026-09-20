@@ -123,7 +123,31 @@ function banWebgpu(): void {
     localStorage.setItem(WEBGPU_BAN_KEY, String(Date.now()))
   } catch {}
 }
-let backendPref: 'webgpu' | 'wasm' = webgpuBanned ? 'wasm' : 'webgpu'
+
+/** 稳定优先模式（localStorage 持久化，无 TTL）：固定 WASM，绕开不稳定的 WebGPU。
+ *  与 7 天禁用的区别：这是用户主动选择的长期策略，重新关闭时才清除。 */
+const STABLE_MODE_KEY = 'shusaku-stable-mode'
+export function stableModeEnabled(): boolean {
+  try {
+    return localStorage.getItem(STABLE_MODE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+export function setStableMode(on: boolean): void {
+  try {
+    if (on) {
+      localStorage.setItem(STABLE_MODE_KEY, '1')
+      banWebgpu()
+    } else {
+      localStorage.removeItem(STABLE_MODE_KEY)
+      // 手动关闭稳定模式 = 用户想重试 WebGPU：一并清除 7 天禁用
+      localStorage.removeItem(WEBGPU_BAN_KEY)
+    }
+  } catch {}
+  backendPref = on ? 'wasm' : webgpuBanned ? 'wasm' : 'webgpu'
+}
+let backendPref: 'webgpu' | 'wasm' = webgpuBanned || stableModeEnabled() ? 'wasm' : 'webgpu'
 
 /** 低配设备（少核/低内存）自动降档：换更快应答，强度封顶 */
 const lowEndDevice = (() => {
@@ -430,10 +454,11 @@ export async function isKatagoTsReady(
 }
 
 /** WebGPU 自检结果（每次页面加载最多一次）。 */
-let webgpuProbe: 'skipped' | 'ok' | 'failed' | 'banned' = webgpuBanned ? 'banned' : 'skipped'
+let webgpuProbe: 'skipped' | 'ok' | 'failed' | 'banned' = webgpuBanned || stableModeEnabled() ? 'banned' : 'skipped'
 
 /** 自检结论的展示文案（App 在引擎就绪后展示）。 */
 export function webgpuProbeLabel(): string {
+  if (stableModeEnabled()) return '稳定优先：固定使用 WASM 推理'
   if (webgpuProbe === 'ok') return 'WebGPU 自检通过'
   if (webgpuProbe === 'failed') return 'WebGPU 自检未通过，本次对局使用 WASM 稳定模式'
   if (webgpuProbe === 'banned') return 'WebGPU 近期不稳定，已启用 WASM 稳定模式'

@@ -51,6 +51,9 @@ interface GameSetupProps {
   open: boolean
   onToggle: () => void
   benchText: string | null
+  /** 稳定优先（固定 WASM、绕开不稳定的 WebGPU） */
+  stableMode: boolean
+  onToggleStable: () => void
   onChange: (patch: Partial<GameConfig>) => void
   onStart: () => void
   onBenchmark: () => void
@@ -60,7 +63,7 @@ function btnCls(active: boolean): string {
   return active ? 'btn btn-sm active' : 'btn btn-sm'
 }
 
-export function GameSetup({ config, disabled, open, onToggle, benchText, onChange, onStart, onBenchmark }: GameSetupProps) {
+export function GameSetup({ config, disabled, open, onToggle, benchText, stableMode, onToggleStable, onChange, onStart, onBenchmark }: GameSetupProps) {
   const setRules = (rules: Rules): void =>
     onChange({ rules, komi: config.handicap > 0 ? 0.5 : defaultKomiFor(config.size, rules) })
 
@@ -228,6 +231,22 @@ export function GameSetup({ config, disabled, open, onToggle, benchText, onChang
             <span className="tiny dim strength-label">
               {STRENGTH_LEVELS[Math.round(config.strength) - 1]?.label ?? ''}
             </span>
+          </div>
+
+          <div className="setup-row">
+            <span className="setup-label">推理</span>
+            <button type="button" className={btnCls(!stableMode)} onClick={onToggleStable}>
+              自动
+            </button>
+            <button
+              type="button"
+              className={btnCls(stableMode)}
+              title="固定使用 WASM 推理，绕开不稳定/较慢的 WebGPU；棋力略有折扣"
+              onClick={onToggleStable}
+            >
+              稳定优先
+            </button>
+            <span className="tiny dim">{stableMode ? '固定 WASM' : 'WebGPU 优先'}</span>
           </div>
 
           <div className="btn-row">

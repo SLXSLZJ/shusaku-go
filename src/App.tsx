@@ -5,7 +5,7 @@ import { computeScore, deadStonesFromOwnership, type ScoreDetail } from './core/
 import { BLACK, WHITE, type BoardSize, type PlayError, type Point } from './core/types'
 import { describeLastMoveParts, type MoveAnnounce } from './engine/commentary'
 import { getEngineBackend, type EngineBackend, type EngineProgress } from './engine/engineFacade'
-import { warmHumanModel, katagoBackendLabel, webgpuProbeLabel } from './engine/katagoTsBackend'
+import { warmHumanModel, katagoBackendLabel, webgpuProbeLabel, stableModeEnabled, setStableMode } from './engine/katagoTsBackend'
 import { playStoneSound } from './sound/stoneSound'
 import type { GamePosition } from './engine/protocol'
 import { strengthLevel } from './engine/strength'
@@ -78,6 +78,8 @@ export default function App() {
   const [announceKey, setAnnounceKey] = useState(0)
   /** AI 上一手的耗时遥测（用时/访问量/后端），便于实测校准各档位 */
   const [aiTelemetry, setAiTelemetry] = useState<string | null>(null)
+  /** 稳定优先：固定 WASM 推理，绕开不稳定/较慢的 WebGPU（localStorage 持久化） */
+  const [stableMode, setStableModeState] = useState(stableModeEnabled())
   const [territoryOn, setTerritoryOn] = useState(false)
   const [territory, setTerritory] = useState<number[] | null>(null)
   const [territoryLead, setTerritoryLead] = useState<string | null>(null)
@@ -385,6 +387,14 @@ export default function App() {
     })
   }
 
+  const handleToggleStable = (): void => {
+    const next = !stableMode
+    setStableMode(next)
+    setStableModeState(next)
+    if (next) setAiTelemetry(null)
+    setStatus({ kind: 'info', text: next ? '稳定优先已开启：固定 WASM 推理（立即生效）' : '已切回自动模式：下次刷新页面后尝试 WebGPU' })
+  }
+
   const handleBenchmark = (): void => {
     const playouts = draft.size === 9 ? 400 : draft.size === 13 ? 200 : 80
     setBenchText('测速中……')
@@ -511,6 +521,8 @@ export default function App() {
           open={setupOpen}
           onToggle={() => setSetupOpen((o) => !o)}
           benchText={benchText}
+          stableMode={stableMode}
+          onToggleStable={handleToggleStable}
           onChange={(patch) => setDraft({ ...draft, ...patch })}
           onStart={handleStart}
           onBenchmark={handleBenchmark}
