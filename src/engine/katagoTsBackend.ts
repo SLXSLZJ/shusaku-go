@@ -100,8 +100,30 @@ interface AnalyzeOutcome {
   }>
 }
 
-/** 推理后端偏好：WebGPU 优先；对局中途故障则永久降级 WASM（本会话内） */
-let backendPref: 'webgpu' | 'wasm' = 'webgpu'
+/** 推理后端偏好：WebGPU 优先；对局中途故障则永久降级 WASM（本会话内）。
+ *  降级同时写入 localStorage（7 天有效）：WebGPU 挂起往往是间歇性的——自检能过、
+ *  下几手后必挂。不持久化的话，每次刷新都要重新交一遍「挂起检测 + 重建」约 40 秒的学费。 */
+const WEBGPU_BAN_KEY = 'shusaku-webgpu-ban'
+const WEBGPU_BAN_TTL_MS = 7 * 24 * 3600 * 1000
+const webgpuBanned = (() => {
+  try {
+    const ts = Number(localStorage.getItem(WEBGPU_BAN_KEY))
+    if (!Number.isFinite(ts) || ts <= 0) return false
+    if (Date.now() - ts > WEBGPU_BAN_TTL_MS) {
+      localStorage.removeItem(WEBGPU_BAN_KEY)
+      return false
+    }
+    return true
+  } catch {
+    return false
+  }
+})()
+function banWebgpu(): void {
+  try {
+    localStorage.setItem(WEBGPU_BAN_KEY, String(Date.now()))
+  } catch {}
+}
+let backendPref: 'webgpu' | 'wasm' = webgpuBanned ? 'wasm' : 'webgpu'
 
 /** 低配设备（少核/低内存）自动降档：换更快应答，强度封顶 */
 const lowEndDevice = (() => {
@@ -278,10 +300,12 @@ async function analyzePosition(
         // 搜索阶段在 WASM 上超时 = 后端慢而非挂死：重建 Worker 无济于事
         // （白付 ~20s 重建成本），留在原 Worker 上用小预算快速出招；
         // WebGPU 挂起或初始化/排队阶段超时才是真挂起，销毁重建并降级 WASM。
+        const wasWebgpu = backendPref === 'webgpu'
         const slowWasmSearch = backendPref === 'wasm' && msg.includes('搜索')
         const tiny = slowWasmSearch || watchdogRetries >= 2
         if (!slowWasmSearch) {
           backendPref = 'wasm'
+          if (wasWebgpu) banWebgpu()
           resetKataGoEngineClient()
         }
         startedAt = 0
@@ -297,7 +321,8 @@ async function analyzePosition(
       }
       if (backendPref === 'webgpu') {
         backendPref = 'wasm'
-        console.warn('[katago] WebGPU 推理失败，已降级 WASM 并重试：', err)
+        banWebgpu()
+        console.warn('[katago] WebGPU 推理失败，已降级 WASM 并重试（7 天内不再尝试 WebGPU）：', err)
         await settle(300)
         continue
       }
@@ -372,7 +397,7 @@ export async function isKatagoTsReady(
   onProgress?: (received: number, total: number) => void,
 ): Promise<boolean> {
   try {
-    const init = getKataGoEngineClient().init(KATAGO_MODEL_URL, 'webgpu', onProgress, threadsParam)
+    const init = getKataGoEngineClient().init(KATAGO_MODEL_URL, backendPref, onProgress, threadsParam)
     let timer: ReturnType<typeof setTimeout> | null = null
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new Error('KataGo 初始化超时')), timeoutMs)
@@ -383,11 +408,13 @@ export async function isKatagoTsReady(
       if (timer) clearTimeout(timer)
     }
     // 初始化成功后立刻做 WebGPU 自检（一次性）：用微型搜索探测后端是否会挂起，
-    // 让不稳定的 WebGPU 在进页面时暴露，而不是在第一手棋里干等看门狗
+    // 让不稳定的 WebGPU 在进页面时暴露，而不是在第一手棋里干等看门狗。
+    // 近 7 天内触发过降级的浏览器直接跳过 WebGPU（含自检），避免每次刷新重交学费
     if (backendPref === 'webgpu') {
       webgpuProbe = (await probeWebgpu()) ? 'ok' : 'failed'
       if (webgpuProbe === 'failed') {
         backendPref = 'wasm'
+        banWebgpu()
         resetKataGoEngineClient()
         console.warn('[katago] WebGPU 开局自检失败（挂起/报错），本次会话改用 WASM，并在后台重建引擎')
         // 后台按 WASM 重建引擎（模型解析约 10~30s，藏在加载横幅期间），避免首手等待
@@ -403,12 +430,13 @@ export async function isKatagoTsReady(
 }
 
 /** WebGPU 自检结果（每次页面加载最多一次）。 */
-let webgpuProbe: 'skipped' | 'ok' | 'failed' = 'skipped'
+let webgpuProbe: 'skipped' | 'ok' | 'failed' | 'banned' = webgpuBanned ? 'banned' : 'skipped'
 
 /** 自检结论的展示文案（App 在引擎就绪后展示）。 */
 export function webgpuProbeLabel(): string {
   if (webgpuProbe === 'ok') return 'WebGPU 自检通过'
   if (webgpuProbe === 'failed') return 'WebGPU 自检未通过，本次对局使用 WASM 稳定模式'
+  if (webgpuProbe === 'banned') return 'WebGPU 近期不稳定，已启用 WASM 稳定模式'
   return '引擎就绪'
 }
 
